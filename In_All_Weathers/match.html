@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listening Match: Weather</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Sarabun:wght@600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Sarabun', sans-serif; background: #f0f9ff; margin: 0; padding: 20px; text-align: center; color: #334155; }
+        h1 { font-family: 'Fredoka One', cursive; color: #0284c7; margin-bottom: 5px;}
+        h2 { font-size: 18px; color: #64748b; margin-top: 0; margin-bottom: 20px;}
+        #game-board { display: none; max-width: 600px; margin: 0 auto; }
+        .stats { display: flex; justify-content: space-between; font-size: 24px; font-weight: 800; margin-bottom: 20px; background: white; padding: 10px 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);}
+        #play-sound-btn { background: #3b82f6; color: white; border: none; padding: 15px 30px; font-size: 20px; border-radius: 15px; cursor: pointer; box-shadow: 0 4px 0 #2563eb; margin-bottom: 20px; width: 100%; font-family: 'Sarabun'; font-weight: 800;}
+        #play-sound-btn:active { transform: translateY(4px); box-shadow: none; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .season-img { width: 100%; border-radius: 15px; cursor: pointer; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: transform 0.1s; }
+        .season-img:active { transform: scale(0.95); }
+        #start-screen, #end-screen { background: white; padding: 30px; border-radius: 20px; max-width: 400px; margin: 50px auto; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .btn { background: #22c55e; color: white; border: none; padding: 15px 30px; font-size: 20px; border-radius: 15px; cursor: pointer; font-weight: 800; width: 100%; box-shadow: 0 4px 0 #16a34a; font-family: 'Sarabun';}
+        .btn:active { transform: translateY(4px); box-shadow: none; }
+        input { width: 90%; padding: 15px; font-size: 18px; margin: 15px 0; border: 2px solid #cbd5e1; border-radius: 10px; font-family: 'Sarabun'; text-align: center;}
+    </style>
+</head>
+<body>
+
+    <div id="start-screen">
+        <h1>Listening Match</h1>
+        <h2>ม.1 Unit 6 Vocabulary Weather</h2>
+        <p style="font-size: 18px;"><strong>วิธีเล่น:</strong> ฟังเสียงชื่อเดือน แล้วคลิกรูปฤดูกาลให้ถูกต้อง!</p>
+        <button class="btn" onclick="startGame()">▶️ เริ่มเกม (60 วินาที)</button>
+    </div>
+
+    <div id="game-board">
+        <div class="stats">
+            <div>⏱️ <span id="time" style="color: #ef4444;">60</span>s</div>
+            <div>⭐ <span id="score" style="color: #eab308;">0</span></div>
+        </div>
+        <button id="play-sound-btn" onclick="playCurrentAudio()">🔊 ฟังคำศัพท์อีกครั้ง</button>
+        <div class="grid">
+            <img src="winter.png" class="season-img" onclick="checkAnswer('Winter')">
+            <img src="spring.png" class="season-img" onclick="checkAnswer('Spring')">
+            <img src="summer.png" class="season-img" onclick="checkAnswer('Summer')">
+            <img src="autumn.png" class="season-img" onclick="checkAnswer('Autumn')">
+        </div>
+    </div>
+
+    <div id="end-screen" style="display: none;">
+        <h1>หมดเวลา!</h1>
+        <h2>ได้ไปทั้งหมด: <span id="final-score" style="color: #eab308; font-size: 24px; font-weight: bold;">0</span> ดาว</h2>
+        <input type="text" id="student-name" placeholder="พิมพ์ชื่อ-สกุล / เลขที่">
+        <button class="btn" onclick="submitScore()">📤 ส่งคะแนน</button>
+    </div>
+
+<script>
+    const data = {
+        'Winter': ['December', 'January', 'February'],
+        'Spring': ['March', 'April', 'May'],
+        'Summer': ['June', 'July', 'August'],
+        'Autumn': ['September', 'October', 'November']
+    };
+    
+    let score = 0;
+    let timeLeft = 60;
+    let timer;
+    let currentSeason, currentMonth;
+    let audio = new Audio();
+    
+    // ** จุดที่ต้องแก้: นำลิงก์ Web App ของ Google Apps Script มาใส่ตรงนี้ **
+    const scriptURL = 'YOUR_GOOGLE_SHEET_URL_HERE'; 
+
+    function startGame() {
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('game-board').style.display = 'block';
+        score = 0; timeLeft = 60;
+        document.getElementById('score').innerText = score;
+        
+        nextQuestion();
+        
+        timer = setInterval(() => {
+            timeLeft--;
+            document.getElementById('time').innerText = timeLeft;
+            if (timeLeft <= 0) endGame();
+        }, 1000);
+    }
+
+    function nextQuestion() {
+        const seasons = Object.keys(data);
+        currentSeason = seasons[Math.floor(Math.random() * seasons.length)];
+        const months = data[currentSeason];
+        currentMonth = months[Math.floor(Math.random() * months.length)];
+        
+        playCurrentAudio();
+    }
+
+    function playCurrentAudio() {
+        audio.src = currentMonth + '.wav';
+        audio.play().catch(e => console.log('Audio error:', e));
+    }
+
+    function checkAnswer(selectedSeason) {
+        if (selectedSeason === currentSeason) {
+            score += 10; 
+            // สามารถเพิ่มเสียง ตอบถูก ตรงนี้ได้
+        }
+        document.getElementById('score').innerText = score;
+        nextQuestion();
+    }
+
+    function endGame() {
+        clearInterval(timer);
+        document.getElementById('game-board').style.display = 'none';
+        document.getElementById('end-screen').style.display = 'block';
+        document.getElementById('final-score').innerText = score;
+    }
+
+    function submitScore() {
+        const name = document.getElementById('student-name').value;
+        if (!name) return alert('กรุณาพิมพ์ชื่อก่อนส่งครับ');
+        
+        const btn = document.querySelector('#end-screen .btn');
+        btn.innerText = 'กำลังส่ง...';
+        btn.disabled = true;
+
+        const formData = new FormData();
+        formData.append('topic', 'ม.1 Unit 6 Vocabulary Weather');
+        formData.append('name', name);
+        formData.append('score', score);
+
+        fetch(scriptURL, { method: 'POST', body: formData })
+            .then(response => {
+                alert('ส่งคะแนนเรียบร้อย!');
+                location.reload();
+            })
+            .catch(error => {
+                alert('ส่งข้อมูลแล้ว (หรืออาจติดสิทธิ์ CORS ชั่วคราว)');
+                location.reload();
+            });
+    }
+</script>
+</body>
+</html>
