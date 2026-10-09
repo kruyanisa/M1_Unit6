@@ -5,40 +5,75 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Listening Match: Weather</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Sarabun:wght@600;800&display=swap" rel="stylesheet">
+    <!-- นำเข้า SweetAlert2 ตามโค้ดต้นฉบับ -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
+        :root {
+            --main-theme: #86efac;
+            --dark-theme: #16a34a;
+            --accent-theme: #14532d;
+            --shadow-3d: rgba(22, 163, 74, 0.15);
+        }
+
         body { font-family: 'Sarabun', sans-serif; background: #f0f9ff; margin: 0; padding: 20px; text-align: center; color: #334155; }
         h1 { font-family: 'Fredoka One', cursive; color: #0284c7; margin-bottom: 5px;}
         h2 { font-size: 18px; color: #64748b; margin-top: 0; margin-bottom: 20px;}
+        
+        /* Profile Bar & Account Switch (ดึงจากต้นฉบับ) */
+        .profile-bar {
+            font-size: clamp(12px, 3.5vw, 14px); background: #dcfce7; border: 2px solid #86efac;
+            padding: 8px 15px; border-radius: 20px; color: var(--dark-theme); font-weight: bold;
+            display: flex; justify-content: center; align-items: center; gap: 10px; margin: 0 auto 20px auto;
+            max-width: 400px;
+        }
+        .btn-switch { background: #fca5a5; color: white; border: none; padding: 4px 12px; border-radius: 12px; cursor: pointer; font-family: 'Sarabun'; font-weight: bold; }
+
+        #start-screen { background: white; padding: 30px; border-radius: 20px; max-width: 400px; margin: 20px auto; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .btn { background: #22c55e; color: white; border: none; padding: 15px 30px; font-size: 20px; border-radius: 15px; cursor: pointer; font-weight: 800; width: 100%; box-shadow: 0 4px 0 #16a34a; font-family: 'Sarabun';}
+        .btn:active { transform: translateY(4px); box-shadow: none; }
+
         #game-board { display: none; max-width: 600px; margin: 0 auto; }
         .stats { display: flex; justify-content: space-between; font-size: 24px; font-weight: 800; margin-bottom: 20px; background: white; padding: 10px 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);}
         #play-sound-btn { background: #3b82f6; color: white; border: none; padding: 15px 30px; font-size: 20px; border-radius: 15px; cursor: pointer; box-shadow: 0 4px 0 #2563eb; margin-bottom: 20px; width: 100%; font-family: 'Sarabun'; font-weight: 800;}
         #play-sound-btn:active { transform: translateY(4px); box-shadow: none; }
         
-        /* ปรับโครงสร้างเพื่อวางข้อความทับรูป */
+        /* ปรับโครงสร้างเพื่อวางข้อความทับรูป (ซ่อมให้แสดงผลชัดเจน) */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .img-container { position: relative; cursor: pointer; transition: transform 0.1s; }
         .img-container:active { transform: scale(0.95); }
         .season-img { width: 100%; border-radius: 15px; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: block; box-sizing: border-box;}
         
         .season-label { 
-            position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+            position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%);
             font-family: 'Fredoka One', sans-serif; font-size: 28px;
             text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 0 4px 8px rgba(0,0,0,0.3);
-            pointer-events: none; /* เพื่อให้คลิกทะลุไปโดนกล่องได้ */
+            pointer-events: none; z-index: 10;
         }
         .text-winter { color: #0284c7; }
         .text-spring { color: #16a34a; }
         .text-summer { color: #0ea5e9; }
         .text-autumn { color: #ea580c; }
 
-        #start-screen, #end-screen { background: white; padding: 30px; border-radius: 20px; max-width: 400px; margin: 50px auto; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        .btn { background: #22c55e; color: white; border: none; padding: 15px 30px; font-size: 20px; border-radius: 15px; cursor: pointer; font-weight: 800; width: 100%; box-shadow: 0 4px 0 #16a34a; font-family: 'Sarabun';}
-        .btn:active { transform: translateY(4px); box-shadow: none; }
-        input { width: 90%; padding: 15px; font-size: 18px; margin: 15px 0; border: 2px solid #cbd5e1; border-radius: 10px; font-family: 'Sarabun'; text-align: center; box-sizing: border-box;}
+        /* Modals (ดึงจากต้นฉบับ) */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(240,253,244,0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 2000; visibility: hidden; opacity: 0; transition: opacity 0.3s; padding: 15px; box-sizing: border-box; }
+        .modal-overlay.active { visibility: visible; opacity: 1; }
+        .modal-box { background: white; padding: 30px 20px; border-radius: 30px; text-align: center; width: 100%; max-width: 340px; border: 4px solid var(--main-theme); box-shadow: 8px 12px 25px var(--shadow-3d); box-sizing: border-box; }
+        .modal-box input { width: 100%; padding: 12px; margin-bottom: 12px; border: 2px solid var(--main-theme); border-radius: 15px; text-align: center; font-family: 'Sarabun'; font-size: 16px; font-weight: 600; box-sizing: border-box; outline: none; }
+        .modal-box input:focus { border-color: var(--dark-theme); }
+        .btn-action { width: 100%; padding: 14px; background: var(--main-theme); color: var(--accent-theme); border: none; border-radius: 15px; font-weight: 800; cursor: pointer; font-family: 'Sarabun'; box-shadow: 0 4px 0 var(--dark-theme); transition: 0.1s; font-size: 17px; }
+        .btn-action:active { transform: translateY(3px); box-shadow: none; }
+        .score-num { font-size: 55px; font-weight: 900; color: var(--dark-theme); margin: 10px 0; display: block; }
     </style>
 </head>
 <body>
 
+    <!-- แถบโปรไฟล์บัญชี (จะแสดงเมื่อล็อกอินแล้ว) -->
+    <div id="userProfile" class="profile-bar" style="display:none;">
+        <span>👤 <span id="p_name"></span> | 🏫 <span id="p_room"></span> | 🆔 <span id="p_id"></span></span>
+        <button class="btn-switch" onclick="switchAccount()">🔄 สลับ</button>
+    </div>
+
+    <!-- หน้าเริ่มเกม -->
     <div id="start-screen">
         <h1>Listening Match</h1>
         <h2>ม.1 Unit 6 Vocabulary Weather</h2>
@@ -46,6 +81,7 @@
         <button class="btn" onclick="startGame()">▶️ เริ่มเกม (60 วินาที)</button>
     </div>
 
+    <!-- กระดานเกม -->
     <div id="game-board">
         <div class="stats">
             <div>⏱️ <span id="time" style="color: #ef4444;">60</span>s</div>
@@ -72,14 +108,30 @@
         </div>
     </div>
 
-    <div id="end-screen" style="display: none;">
-        <h1>หมดเวลา!</h1>
-        <h2>ได้ไปทั้งหมด: <span id="final-score" style="color: #eab308; font-size: 24px; font-weight: bold;">0</span> ดาว</h2>
-        <input type="text" id="student-name" placeholder="พิมพ์ชื่อ-สกุล / เลขที่">
-        <button class="btn" onclick="submitScore()">📤 ส่งคะแนน</button>
+    <!-- Modals กรอกชื่อ และ ส่งคะแนน (ดึงจากต้นฉบับ) -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal-box">
+            <h2 id="modalTitle" style="color:var(--dark-theme); margin-top:0; font-size: 24px;">📝 ลงชื่อเข้าเรียน</h2>
+            <p id="modalSub" style="color: #6b7280; font-weight: 600; margin-top: 0; display:none; font-size: 14px;"></p>
+            <input type="text" id="in_name" placeholder="ชื่อ - นามสกุล">
+            <input type="text" id="in_room" placeholder="ชั้น/ห้อง (เช่น 1/1)">
+            <input type="text" id="in_id" placeholder="รหัสนักเรียน (5 หลัก)" maxlength="5">
+            <button class="btn-action" onclick="confirmUser()">🚀 ยืนยันข้อมูล</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="scoreModal">
+        <div class="modal-box">
+            <h2 style="color:var(--dark-theme); margin-top:0; font-size: 26px;">🎉 หมดเวลา!</h2>
+            <p style="color: #6b7280; font-weight: 600;">ส่งคะแนนเข้าสู่ระบบ</p>
+            <span class="score-num"><span id="finalScoreText">0</span> ดาว</span>
+            <div id="saveStatus" style="font-weight:bold; font-size:15px; margin-bottom:15px; color:#15803d;"></div>
+            <button id="playAgainBtn" class="btn-action" onclick="restartGame()" style="display:none;">🔄 เล่นอีกรอบ</button>
+        </div>
     </div>
 
 <script>
+    // ข้อมูลเกม
     const data = {
         'Winter': ['December', 'January', 'February'],
         'Spring': ['March', 'April', 'May'],
@@ -87,15 +139,118 @@
         'Autumn': ['September', 'October', 'November']
     };
     
+    // ** อย่าลืมใส่ลิงก์ Sheet ตรงนี้นะครับ **
+    const scriptURL = 'YOUR_GOOGLE_SHEET_URL_HERE'; 
+    const TOPIC_NAME = 'ม.1 Unit 6 Vocabulary Weather';
+
     let score = 0;
     let timeLeft = 60;
     let timer;
     let currentSeason, currentMonth;
     let audio = new Audio();
     
-    // อย่าลืมใส่ลิงก์ Sheet ตรงนี้นะครับ
-    const scriptURL = 'YOUR_GOOGLE_SHEET_URL_HERE'; 
+    let isSwitchingAccount = false;
 
+    // ตรวจสอบสถานะล็อกอินเมื่อเปิดหน้าเว็บ
+    window.onload = () => { 
+        checkLoginStatus(); 
+    };
+
+    // ==========================================
+    // ระบบบัญชี และ ส่งคะแนน (จากต้นฉบับ)
+    // ==========================================
+    function checkLoginStatus() {
+        if(localStorage.getItem('studentId')) {
+            document.getElementById('userProfile').style.display = 'flex';
+            document.getElementById('p_name').innerText = localStorage.getItem('studentName');
+            document.getElementById('p_room').innerText = localStorage.getItem('studentRoom');
+            document.getElementById('p_id').innerText = localStorage.getItem('studentId'); 
+        } else {
+            document.getElementById('userProfile').style.display = 'none';
+        }
+    }
+
+    function switchAccount() {
+        Swal.fire({
+            title: '⚠️ เปลี่ยนคนเล่น?', text: "ข้อมูลเดิมจะถูกสลับออกนะ", icon: 'warning',
+            showCancelButton: true, confirmButtonColor: '#16a34a', cancelButtonColor: '#9ca3af',
+            confirmButtonText: 'ตกลง', cancelButtonText: 'ยกเลิก'
+        }).then((res) => {
+            if(res.isConfirmed) {
+                localStorage.clear(); isSwitchingAccount = true;
+                document.getElementById('in_name').value = ''; 
+                document.getElementById('in_room').value = ''; 
+                document.getElementById('in_id').value = '';
+                document.getElementById('modalTitle').innerText = "🔄 ลงชื่อบัญชีใหม่";
+                document.getElementById('modalSub').innerText = "กรอกข้อมูลเพื่อเล่นต่อ";
+                document.getElementById('modalSub').style.display = 'block';
+                checkLoginStatus(); 
+                document.getElementById('loginModal').classList.add('active');
+            }
+        });
+    }
+
+    document.getElementById('in_room').addEventListener('blur', function() {
+        let nums = this.value.match(/\d+/g);
+        if (nums && nums.length >= 2) this.value = `ม.${nums[0]}/${nums[1]}`;
+        else if (nums && nums.length === 1) this.value = `ม.1/${nums[0]}`;
+    });
+
+    function confirmUser() {
+        let n = document.getElementById('in_name').value.trim();
+        let r = document.getElementById('in_room').value.trim();
+        let id = document.getElementById('in_id').value.trim();
+        if(!n || !r || id.length !== 5) { Swal.fire('ข้อมูลไม่ครบ!', 'กรุณากรอกชื่อ ห้อง และรหัส 5 หลัก', 'warning'); return; }
+        
+        localStorage.setItem('studentName', n); 
+        localStorage.setItem('studentRoom', r); 
+        localStorage.setItem('studentId', id);
+        
+        document.getElementById('loginModal').classList.remove('active'); 
+        checkLoginStatus();
+
+        if (isSwitchingAccount) { 
+            isSwitchingAccount = false; 
+        } else { 
+            // ถ้ายืนยันหลังจากเล่นจบแล้ว
+            submitScore(); 
+        }
+    }
+
+    function submitScore() {
+        document.getElementById('scoreModal').classList.add('active');
+        document.getElementById('finalScoreText').innerText = score;
+        const stat = document.getElementById('saveStatus');
+        const playAgainBtn = document.getElementById('playAgainBtn');
+        checkLoginStatus();
+
+        stat.innerText = "⏳ กำลังส่งคะแนน...";
+        stat.style.color = "var(--dark-theme)";
+        playAgainBtn.style.display = 'none';
+
+        // รวมชื่อ ชั้น รหัส ส่งเข้า Sheet ตามรูปแบบเดิม
+        const fullName = localStorage.getItem('studentName') + ' ' + localStorage.getItem('studentRoom') + ' ' + localStorage.getItem('studentId');
+
+        const formData = new FormData();
+        formData.append('topic', TOPIC_NAME);
+        formData.append('name', fullName);
+        formData.append('score', score);
+
+        fetch(scriptURL, { method: 'POST', body: formData })
+            .then(response => {
+                stat.innerText = "✅ บันทึกคะแนนลงระบบเรียบร้อย!"; 
+                stat.style.color = "#15803d";
+                playAgainBtn.style.display = 'block';
+            })
+            .catch(error => {
+                stat.innerText = "⚠️ ส่งข้อมูลแล้ว (อาจติดขัดเล็กน้อย)";
+                playAgainBtn.style.display = 'block';
+            });
+    }
+
+    // ==========================================
+    // ระบบการเล่นเกม
+    // ==========================================
     function startGame() {
         document.getElementById('start-screen').style.display = 'none';
         document.getElementById('game-board').style.display = 'block';
@@ -136,32 +291,21 @@
     function endGame() {
         clearInterval(timer);
         document.getElementById('game-board').style.display = 'none';
-        document.getElementById('end-screen').style.display = 'block';
-        document.getElementById('final-score').innerText = score;
+        
+        // ตรวจสอบว่าล็อกอินหรือยัง ถ้ายังให้เด้ง Modal กรอกชื่อ
+        if(!localStorage.getItem('studentId')) {
+            document.getElementById('modalTitle').innerText = "👋 ยอดเยี่ยม!";
+            document.getElementById('modalSub').innerText = `ได้คะแนน ${score} ดาว กรอกข้อมูลเพื่อบันทึก`;
+            document.getElementById('modalSub').style.display = 'block';
+            document.getElementById('loginModal').classList.add('active');
+        } else { 
+            submitScore(); 
+        }
     }
 
-    function submitScore() {
-        const name = document.getElementById('student-name').value;
-        if (!name) return alert('กรุณาพิมพ์ชื่อก่อนส่งครับ');
-        
-        const btn = document.querySelector('#end-screen .btn');
-        btn.innerText = 'กำลังส่ง...';
-        btn.disabled = true;
-
-        const formData = new FormData();
-        formData.append('topic', 'ม.1 Unit 6 Vocabulary Weather');
-        formData.append('name', name);
-        formData.append('score', score);
-
-        fetch(scriptURL, { method: 'POST', body: formData })
-            .then(response => {
-                alert('ส่งคะแนนเรียบร้อย!');
-                location.reload();
-            })
-            .catch(error => {
-                alert('ส่งข้อมูลแล้ว (หรืออาจติดสิทธิ์ CORS ชั่วคราว)');
-                location.reload();
-            });
+    function restartGame() {
+        document.getElementById('scoreModal').classList.remove('active');
+        document.getElementById('start-screen').style.display = 'block';
     }
 </script>
 </body>
