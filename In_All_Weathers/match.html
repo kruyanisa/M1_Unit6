@@ -13,13 +13,28 @@
         .stats { display: flex; justify-content: space-between; font-size: 24px; font-weight: 800; margin-bottom: 20px; background: white; padding: 10px 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);}
         #play-sound-btn { background: #3b82f6; color: white; border: none; padding: 15px 30px; font-size: 20px; border-radius: 15px; cursor: pointer; box-shadow: 0 4px 0 #2563eb; margin-bottom: 20px; width: 100%; font-family: 'Sarabun'; font-weight: 800;}
         #play-sound-btn:active { transform: translateY(4px); box-shadow: none; }
+        
+        /* ปรับโครงสร้างเพื่อวางข้อความทับรูป */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .season-img { width: 100%; border-radius: 15px; cursor: pointer; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: transform 0.1s; }
-        .season-img:active { transform: scale(0.95); }
+        .img-container { position: relative; cursor: pointer; transition: transform 0.1s; }
+        .img-container:active { transform: scale(0.95); }
+        .season-img { width: 100%; border-radius: 15px; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: block; box-sizing: border-box;}
+        
+        .season-label { 
+            position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+            font-family: 'Fredoka One', sans-serif; font-size: 28px;
+            text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 0 4px 8px rgba(0,0,0,0.3);
+            pointer-events: none; /* เพื่อให้คลิกทะลุไปโดนกล่องได้ */
+        }
+        .text-winter { color: #0284c7; }
+        .text-spring { color: #16a34a; }
+        .text-summer { color: #0ea5e9; }
+        .text-autumn { color: #ea580c; }
+
         #start-screen, #end-screen { background: white; padding: 30px; border-radius: 20px; max-width: 400px; margin: 50px auto; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         .btn { background: #22c55e; color: white; border: none; padding: 15px 30px; font-size: 20px; border-radius: 15px; cursor: pointer; font-weight: 800; width: 100%; box-shadow: 0 4px 0 #16a34a; font-family: 'Sarabun';}
         .btn:active { transform: translateY(4px); box-shadow: none; }
-        input { width: 90%; padding: 15px; font-size: 18px; margin: 15px 0; border: 2px solid #cbd5e1; border-radius: 10px; font-family: 'Sarabun'; text-align: center;}
+        input { width: 90%; padding: 15px; font-size: 18px; margin: 15px 0; border: 2px solid #cbd5e1; border-radius: 10px; font-family: 'Sarabun'; text-align: center; box-sizing: border-box;}
     </style>
 </head>
 <body>
@@ -38,10 +53,22 @@
         </div>
         <button id="play-sound-btn" onclick="playCurrentAudio()">🔊 ฟังคำศัพท์อีกครั้ง</button>
         <div class="grid">
-            <img src="winter.png" class="season-img" onclick="checkAnswer('Winter')">
-            <img src="spring.png" class="season-img" onclick="checkAnswer('Spring')">
-            <img src="summer.png" class="season-img" onclick="checkAnswer('Summer')">
-            <img src="autumn.png" class="season-img" onclick="checkAnswer('Autumn')">
+            <div class="img-container" onclick="checkAnswer('Winter')">
+                <img src="winter.png" class="season-img">
+                <div class="season-label text-winter">Winter</div>
+            </div>
+            <div class="img-container" onclick="checkAnswer('Spring')">
+                <img src="spring.png" class="season-img">
+                <div class="season-label text-spring">Spring</div>
+            </div>
+            <div class="img-container" onclick="checkAnswer('Summer')">
+                <img src="summer.png" class="season-img">
+                <div class="season-label text-summer">Summer</div>
+            </div>
+            <div class="img-container" onclick="checkAnswer('Autumn')">
+                <img src="autumn.png" class="season-img">
+                <div class="season-label text-autumn">Autumn</div>
+            </div>
         </div>
     </div>
 
@@ -66,7 +93,7 @@
     let currentSeason, currentMonth;
     let audio = new Audio();
     
-    // ** จุดที่ต้องแก้: นำลิงก์ Web App ของ Google Apps Script มาใส่ตรงนี้ **
+    // อย่าลืมใส่ลิงก์ Sheet ตรงนี้นะครับ
     const scriptURL = 'YOUR_GOOGLE_SHEET_URL_HERE'; 
 
     function startGame() {
@@ -101,7 +128,6 @@
     function checkAnswer(selectedSeason) {
         if (selectedSeason === currentSeason) {
             score += 10; 
-            // สามารถเพิ่มเสียง ตอบถูก ตรงนี้ได้
         }
         document.getElementById('score').innerText = score;
         nextQuestion();
