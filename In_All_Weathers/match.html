@@ -5,26 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Listening Match: Weather</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Sarabun:wght@600;800&display=swap" rel="stylesheet">
-    <!-- นำเข้า SweetAlert2 ตามโค้ดต้นฉบับ -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://kruyanisa.github.io/classroom-core/quiz-config.js"></script>
     <style>
         :root {
-            --main-theme: #86efac;
-            --dark-theme: #16a34a;
-            --accent-theme: #14532d;
+            --main-theme: #86efac; --dark-theme: #16a34a; --accent-theme: #14532d;
             --shadow-3d: rgba(22, 163, 74, 0.15);
         }
-
         body { font-family: 'Sarabun', sans-serif; background: #f0f9ff; margin: 0; padding: 20px; text-align: center; color: #334155; }
         h1 { font-family: 'Fredoka One', cursive; color: #0284c7; margin-bottom: 5px;}
         h2 { font-size: 18px; color: #64748b; margin-top: 0; margin-bottom: 20px;}
         
-        /* Profile Bar & Account Switch (ดึงจากต้นฉบับ) */
         .profile-bar {
             font-size: clamp(12px, 3.5vw, 14px); background: #dcfce7; border: 2px solid #86efac;
             padding: 8px 15px; border-radius: 20px; color: var(--dark-theme); font-weight: bold;
-            display: flex; justify-content: center; align-items: center; gap: 10px; margin: 0 auto 20px auto;
-            max-width: 400px;
+            display: flex; justify-content: center; align-items: center; gap: 10px; margin: 0 auto 20px auto; max-width: 400px;
         }
         .btn-switch { background: #fca5a5; color: white; border: none; padding: 4px 12px; border-radius: 12px; cursor: pointer; font-family: 'Sarabun'; font-weight: bold; }
 
@@ -33,28 +28,28 @@
         .btn:active { transform: translateY(4px); box-shadow: none; }
 
         #game-board { display: none; max-width: 600px; margin: 0 auto; }
-        .stats { display: flex; justify-content: space-between; font-size: 24px; font-weight: 800; margin-bottom: 20px; background: white; padding: 10px 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);}
+        .stats { display: flex; justify-content: space-between; font-size: 20px; font-weight: 800; margin-bottom: 20px; background: white; padding: 10px 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);}
         #play-sound-btn { background: #3b82f6; color: white; border: none; padding: 15px 30px; font-size: 20px; border-radius: 15px; cursor: pointer; box-shadow: 0 4px 0 #2563eb; margin-bottom: 20px; width: 100%; font-family: 'Sarabun'; font-weight: 800;}
         #play-sound-btn:active { transform: translateY(4px); box-shadow: none; }
         
-        /* ปรับโครงสร้างเพื่อวางข้อความทับรูป (ซ่อมให้แสดงผลชัดเจน) */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .img-container { position: relative; cursor: pointer; transition: transform 0.1s; }
+        .img-container { position: relative; cursor: pointer; transition: transform 0.1s; border-radius: 15px; }
         .img-container:active { transform: scale(0.95); }
-        .season-img { width: 100%; border-radius: 15px; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: block; box-sizing: border-box;}
+        .season-img { width: 100%; border-radius: 15px; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: block; box-sizing: border-box; transition: 0.2s;}
         
+        /* ไฮไลท์ตอนตอบถูก/ผิด */
+        .img-container.correct .season-img { border-color: #22c55e; box-shadow: 0 0 20px rgba(34, 197, 94, 0.8); }
+        .img-container.wrong .season-img { border-color: #ef4444; box-shadow: 0 0 20px rgba(239, 68, 68, 0.8); }
+
         .season-label { 
             position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%);
             font-family: 'Fredoka One', sans-serif; font-size: 28px;
             text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 0 4px 8px rgba(0,0,0,0.3);
             pointer-events: none; z-index: 10;
         }
-        .text-winter { color: #0284c7; }
-        .text-spring { color: #16a34a; }
-        .text-summer { color: #0ea5e9; }
-        .text-autumn { color: #ea580c; }
+        .text-winter { color: #0284c7; } .text-spring { color: #16a34a; }
+        .text-summer { color: #0ea5e9; } .text-autumn { color: #ea580c; }
 
-        /* Modals (ดึงจากต้นฉบับ) */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(240,253,244,0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 2000; visibility: hidden; opacity: 0; transition: opacity 0.3s; padding: 15px; box-sizing: border-box; }
         .modal-overlay.active { visibility: visible; opacity: 1; }
         .modal-box { background: white; padding: 30px 20px; border-radius: 30px; text-align: center; width: 100%; max-width: 340px; border: 4px solid var(--main-theme); box-shadow: 8px 12px 25px var(--shadow-3d); box-sizing: border-box; }
@@ -67,48 +62,45 @@
 </head>
 <body>
 
-    <!-- แถบโปรไฟล์บัญชี (จะแสดงเมื่อล็อกอินแล้ว) -->
     <div id="userProfile" class="profile-bar" style="display:none;">
         <span>👤 <span id="p_name"></span> | 🏫 <span id="p_room"></span> | 🆔 <span id="p_id"></span></span>
         <button class="btn-switch" onclick="switchAccount()">🔄 สลับ</button>
     </div>
 
-    <!-- หน้าเริ่มเกม -->
     <div id="start-screen">
         <h1>Listening Match</h1>
         <h2>ม.1 Unit 6 Vocabulary Weather</h2>
         <p style="font-size: 18px;"><strong>วิธีเล่น:</strong> ฟังเสียงชื่อเดือน แล้วคลิกรูปฤดูกาลให้ถูกต้อง!</p>
-        <button class="btn" onclick="startGame()">▶️ เริ่มเกม (60 วินาที)</button>
+        <button class="btn" onclick="startGame()">▶️ เริ่มเกม (12 ข้อ)</button>
     </div>
 
-    <!-- กระดานเกม -->
     <div id="game-board">
         <div class="stats">
+            <div>📝 <span id="qCount" style="color: #64748b;">ข้อ 1 / 12</span></div>
             <div>⏱️ <span id="time" style="color: #ef4444;">60</span>s</div>
             <div>⭐ <span id="score" style="color: #eab308;">0</span></div>
         </div>
-        <button id="play-sound-btn" onclick="playCurrentAudio()">🔊 ฟังคำศัพท์อีกครั้ง</button>
+        <button id="play-sound-btn" onclick="playCurrentAudio()">🔊 ฟังคำศัพท์</button>
         <div class="grid">
-            <div class="img-container" onclick="checkAnswer('Winter')">
+            <div id="box-Winter" class="img-container" onclick="checkAnswer('Winter')">
                 <img src="winter.png" class="season-img">
                 <div class="season-label text-winter">Winter</div>
             </div>
-            <div class="img-container" onclick="checkAnswer('Spring')">
+            <div id="box-Spring" class="img-container" onclick="checkAnswer('Spring')">
                 <img src="spring.png" class="season-img">
                 <div class="season-label text-spring">Spring</div>
             </div>
-            <div class="img-container" onclick="checkAnswer('Summer')">
+            <div id="box-Summer" class="img-container" onclick="checkAnswer('Summer')">
                 <img src="summer.png" class="season-img">
                 <div class="season-label text-summer">Summer</div>
             </div>
-            <div class="img-container" onclick="checkAnswer('Autumn')">
+            <div id="box-Autumn" class="img-container" onclick="checkAnswer('Autumn')">
                 <img src="autumn.png" class="season-img">
                 <div class="season-label text-autumn">Autumn</div>
             </div>
         </div>
     </div>
 
-    <!-- Modals กรอกชื่อ และ ส่งคะแนน (ดึงจากต้นฉบับ) -->
     <div class="modal-overlay" id="loginModal">
         <div class="modal-box">
             <h2 id="modalTitle" style="color:var(--dark-theme); margin-top:0; font-size: 24px;">📝 ลงชื่อเข้าเรียน</h2>
@@ -122,16 +114,15 @@
 
     <div class="modal-overlay" id="scoreModal">
         <div class="modal-box">
-            <h2 style="color:var(--dark-theme); margin-top:0; font-size: 26px;">🎉 หมดเวลา!</h2>
-            <p style="color: #6b7280; font-weight: 600;">ส่งคะแนนเข้าสู่ระบบ</p>
-            <span class="score-num"><span id="finalScoreText">0</span> ดาว</span>
+            <h2 style="color:var(--dark-theme); margin-top:0; font-size: 26px;">🎉 จบเกม!</h2>
+            <p style="color: #6b7280; font-weight: 600;">คะแนนของคุณคือ</p>
+            <span class="score-num"><span id="finalScoreText">0</span> / 12</span>
             <div id="saveStatus" style="font-weight:bold; font-size:15px; margin-bottom:15px; color:#15803d;"></div>
             <button id="playAgainBtn" class="btn-action" onclick="restartGame()" style="display:none;">🔄 เล่นอีกรอบ</button>
         </div>
     </div>
 
 <script>
-    // ข้อมูลเกม
     const data = {
         'Winter': ['December', 'January', 'February'],
         'Spring': ['March', 'April', 'May'],
@@ -139,26 +130,22 @@
         'Autumn': ['September', 'October', 'November']
     };
     
-    // ** อย่าลืมใส่ลิงก์ Sheet ตรงนี้นะครับ **
-    const scriptURL = 'YOUR_GOOGLE_SHEET_URL_HERE'; 
     const TOPIC_NAME = 'ม.1 Unit 6 Vocabulary Weather';
+    const MAX_Q = 12; // จำนวนข้อทั้งหมด
 
     let score = 0;
     let timeLeft = 60;
     let timer;
+    let currentQ = 1;
     let currentSeason, currentMonth;
     let audio = new Audio();
-    
     let isSwitchingAccount = false;
+    let canClick = true;
+    
+    let allMonths = []; // เก็บเดือนทั้ง 12 ไว้สุ่มไม่ซ้ำ
 
-    // ตรวจสอบสถานะล็อกอินเมื่อเปิดหน้าเว็บ
-    window.onload = () => { 
-        checkLoginStatus(); 
-    };
+    window.onload = () => { checkLoginStatus(); };
 
-    // ==========================================
-    // ระบบบัญชี และ ส่งคะแนน (จากต้นฉบับ)
-    // ==========================================
     function checkLoginStatus() {
         if(localStorage.getItem('studentId')) {
             document.getElementById('userProfile').style.display = 'flex';
@@ -212,7 +199,6 @@
         if (isSwitchingAccount) { 
             isSwitchingAccount = false; 
         } else { 
-            // ถ้ายืนยันหลังจากเล่นจบแล้ว
             submitScore(); 
         }
     }
@@ -224,39 +210,48 @@
         const playAgainBtn = document.getElementById('playAgainBtn');
         checkLoginStatus();
 
+        if(typeof QUIZ_CONFIG === 'undefined' || !QUIZ_CONFIG.SCRIPT_URL) {
+            stat.innerText = "❌ ไม่พบไฟล์ตั้งค่าการเชื่อมต่อ (quiz-config.js)"; 
+            playAgainBtn.style.display = 'block'; return;
+        }
+
         stat.innerText = "⏳ กำลังส่งคะแนน...";
         stat.style.color = "var(--dark-theme)";
         playAgainBtn.style.display = 'none';
 
-        // รวมชื่อ ชั้น รหัส ส่งเข้า Sheet ตามรูปแบบเดิม
-        const fullName = localStorage.getItem('studentName') + ' ' + localStorage.getItem('studentRoom') + ' ' + localStorage.getItem('studentId');
+        const payload = {
+            name: localStorage.getItem('studentName'), 
+            room: localStorage.getItem('studentRoom'),
+            studentId: "'" + localStorage.getItem('studentId'), 
+            lesson: TOPIC_NAME, 
+            score: score, 
+            maxScore: MAX_Q
+        };
 
-        const formData = new FormData();
-        formData.append('topic', TOPIC_NAME);
-        formData.append('name', fullName);
-        formData.append('score', score);
+        fetch(QUIZ_CONFIG.SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) })
+            .catch(e => console.error(e));
 
-        fetch(scriptURL, { method: 'POST', body: formData })
-            .then(response => {
-                stat.innerText = "✅ บันทึกคะแนนลงระบบเรียบร้อย!"; 
-                stat.style.color = "#15803d";
-                playAgainBtn.style.display = 'block';
-            })
-            .catch(error => {
-                stat.innerText = "⚠️ ส่งข้อมูลแล้ว (อาจติดขัดเล็กน้อย)";
-                playAgainBtn.style.display = 'block';
-            });
+        setTimeout(() => {
+            stat.innerText = "✅ บันทึกคะแนนลงระบบเรียบร้อย!"; 
+            stat.style.color = "#15803d";
+            playAgainBtn.style.display = 'block';
+        }, 2000);
     }
 
-    // ==========================================
-    // ระบบการเล่นเกม
-    // ==========================================
     function startGame() {
         document.getElementById('start-screen').style.display = 'none';
         document.getElementById('game-board').style.display = 'block';
-        score = 0; timeLeft = 60;
+        score = 0; currentQ = 1; timeLeft = 60;
         document.getElementById('score').innerText = score;
+        document.getElementById('qCount').innerText = `ข้อ 1 / ${MAX_Q}`;
         
+        // เตรียมชุดคำถาม
+        allMonths = [];
+        for (let season in data) {
+            data[season].forEach(m => allMonths.push({month: m, season: season}));
+        }
+        allMonths.sort(() => Math.random() - 0.5); // สลับข้อ
+
         nextQuestion();
         
         timer = setInterval(() => {
@@ -267,11 +262,16 @@
     }
 
     function nextQuestion() {
-        const seasons = Object.keys(data);
-        currentSeason = seasons[Math.floor(Math.random() * seasons.length)];
-        const months = data[currentSeason];
-        currentMonth = months[Math.floor(Math.random() * months.length)];
+        if(currentQ > MAX_Q || allMonths.length === 0) {
+            endGame(); return;
+        }
         
+        document.getElementById('qCount').innerText = `ข้อ ${currentQ} / ${MAX_Q}`;
+        let q = allMonths.pop();
+        currentMonth = q.month;
+        currentSeason = q.season;
+        
+        canClick = true;
         playCurrentAudio();
     }
 
@@ -281,21 +281,33 @@
     }
 
     function checkAnswer(selectedSeason) {
+        if (!canClick) return;
+        canClick = false;
+
+        const box = document.getElementById('box-' + selectedSeason);
+
         if (selectedSeason === currentSeason) {
-            score += 10; 
+            score++;
+            document.getElementById('score').innerText = score;
+            box.classList.add('correct');
+        } else {
+            box.classList.add('wrong');
         }
-        document.getElementById('score').innerText = score;
-        nextQuestion();
+
+        setTimeout(() => {
+            box.classList.remove('correct', 'wrong');
+            currentQ++;
+            nextQuestion();
+        }, 800); // หน่วงเวลาให้เห็นไฮไลท์ 0.8 วิ
     }
 
     function endGame() {
         clearInterval(timer);
         document.getElementById('game-board').style.display = 'none';
         
-        // ตรวจสอบว่าล็อกอินหรือยัง ถ้ายังให้เด้ง Modal กรอกชื่อ
         if(!localStorage.getItem('studentId')) {
             document.getElementById('modalTitle').innerText = "👋 ยอดเยี่ยม!";
-            document.getElementById('modalSub').innerText = `ได้คะแนน ${score} ดาว กรอกข้อมูลเพื่อบันทึก`;
+            document.getElementById('modalSub').innerText = `ได้คะแนน ${score}/${MAX_Q} กรอกข้อมูลเพื่อบันทึก`;
             document.getElementById('modalSub').style.display = 'block';
             document.getElementById('loginModal').classList.add('active');
         } else { 
