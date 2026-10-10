@@ -85,7 +85,8 @@
         .vocab-container {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center; /* เปลี่ยนเป็น center เพื่อให้อยู่ตรงกลาง */
+            position: relative; /* เพิ่มบรรทัดนี้ */
             width: 100%;
             margin-top: 10px;
             padding: 0 5px;
@@ -100,6 +101,8 @@
         }
 
         .play-btn { 
+            position: absolute; /* เพิ่มบรรทัดนี้ */
+            right: 5px; /* เพิ่มบรรทัดนี้ */
             background: #3b82f6; 
             color: white; 
             border: none; 
