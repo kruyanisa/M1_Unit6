@@ -17,11 +17,11 @@
         p { color: #64748b; margin-bottom: 30px; font-size: 18px; }
 
         .grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); 
-            gap: 20px; 
-            max-width: 800px; 
-            margin: 0 auto; 
+    display: grid; 
+    grid-template-columns: repeat(3, 1fr); /* บังคับแถวละ 3 รูป */
+    gap: 20px; 
+    max-width: 900px; /* ขยายความกว้างรวม */
+    margin: 0 auto; 
         }
 
         .flip-card { 
@@ -88,10 +88,11 @@
         }
 
         .vocab-text { 
-            font-family: 'Fredoka One', cursive; 
-            font-size: 18px; 
-            color: #334155; 
-            margin: 0;
+    font-family: 'Fredoka One', cursive; 
+    font-size: 16px; /* ลดขนาดลงเล็กน้อย */
+    color: #334155; 
+    margin: 0;
+    white-space: nowrap; /* บังคับไม่ให้ตัดบรรทัด */
         }
 
         .play-btn { 
@@ -114,6 +115,14 @@
             transform: translateY(3px); 
             box-shadow: none; 
         }
+
+        /* เพิ่มส่วนนี้ล่างสุดของ <style> เพื่อให้ยังเรียงสวยบนมือถือและแท็บเล็ต */
+@media (max-width: 768px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 480px) {
+    .grid { grid-template-columns: 1fr; }
+}
     </style>
 </head>
 <body>
