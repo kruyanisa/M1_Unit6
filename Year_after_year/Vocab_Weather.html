@@ -1,1 +1,177 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocabulary Flashcards</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Sarabun:wght@600;800&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Sarabun', sans-serif; 
+            background: #f0f9ff; 
+            margin: 0; 
+            padding: 20px; 
+            text-align: center; 
+        }
+        h1 { font-family: 'Fredoka One', cursive; color: #0284c7; }
+        p { color: #64748b; margin-bottom: 30px; font-size: 18px; }
 
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); 
+            gap: 20px; 
+            max-width: 800px; 
+            margin: 0 auto; 
+        }
+
+        .flip-card { 
+            background-color: transparent; 
+            width: 100%; 
+            height: 220px; 
+            perspective: 1000px; 
+            cursor: pointer; 
+        }
+
+        .flip-card-inner { 
+            position: relative; 
+            width: 100%; 
+            height: 100%; 
+            text-align: center; 
+            transition: transform 0.6s; 
+            transform-style: preserve-3d; 
+        }
+
+        .flip-card.flipped .flip-card-inner { 
+            transform: rotateY(180deg); 
+        }
+
+        .flip-card-front, .flip-card-back { 
+            position: absolute; 
+            width: 100%; 
+            height: 100%; 
+            backface-visibility: hidden; 
+            border-radius: 20px; 
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1); 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 10px; 
+            box-sizing: border-box; 
+        }
+
+        .flip-card-front { background-color: white; }
+        
+        .flip-card-back { 
+            background-color: #dcfce7; 
+            color: #16a34a; 
+            transform: rotateY(180deg); 
+            font-size: 22px; 
+            font-weight: 800; 
+            border: 4px solid #86efac;
+        }
+
+        .card-img { 
+            width: 100%; 
+            height: 120px; 
+            object-fit: cover; 
+            border-radius: 12px; 
+        }
+
+        .vocab-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        .vocab-text { 
+            font-family: 'Fredoka One', cursive; 
+            font-size: 18px; 
+            color: #334155; 
+            margin: 0;
+        }
+
+        .play-btn { 
+            background: #3b82f6; 
+            color: white; 
+            border: none; 
+            border-radius: 50%; 
+            width: 35px; 
+            height: 35px; 
+            cursor: pointer; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            font-size: 18px;
+            box-shadow: 0 3px 0 #2563eb;
+            transition: 0.1s;
+        }
+
+        .play-btn:active { 
+            transform: translateY(3px); 
+            box-shadow: none; 
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Weather Vocabulary</h1>
+    <p>แตะที่ไอคอน 🔊 เพื่อฟังเสียง หรือ แตะที่การ์ดเพื่อดูคำแปล</p>
+
+    <div class="grid" id="flashcard-grid">
+        <!-- การ์ดจะถูกสร้างด้วย JavaScript -->
+    </div>
+
+<script>
+    const flashcards = [
+        { id: 'wet_rainy', en: 'wet & rainy', th: 'ชื้นแฉะและมีฝนตก' },
+        { id: 'cloudy_windy', en: 'cloudy & windy', th: 'มีเมฆมากและลมแรง' },
+        { id: 'cold_snowy', en: 'cold & snowy', th: 'หนาวและมีหิมะตก' },
+        { id: 'hot_sunny', en: 'hot & sunny', th: 'ร้อนและมีแดดจัด' },
+        { id: 'warm_sunny', en: 'warm & sunny', th: 'อบอุ่นและมีแดด' },
+        { id: 'chilly_foggy', en: 'chilly & foggy', th: 'หนาวเย็นและมีหมอก' }
+    ];
+
+    const grid = document.getElementById('flashcard-grid');
+
+    flashcards.forEach(card => {
+        grid.innerHTML += `
+            <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                <div class="flip-card-inner">
+                    <!-- ด้านหน้า (รูป + คำศัพท์อังกฤษ + ปุ่มฟังเสียง) -->
+                    <div class="flip-card-front">
+                        <img src="${card.id}.jpg" class="card-img" alt="${card.en}">
+                        <div class="vocab-container">
+                            <h3 class="vocab-text">${card.en}</h3>
+                            <button class="play-btn" onclick="playAudio(event, '${card.id}')">🔊</button>
+                        </div>
+                    </div>
+                    <!-- ด้านหลัง (คำแปลภาษาไทย) -->
+                    <div class="flip-card-back">
+                        ${card.th}
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    let currentAudio = null;
+
+    function playAudio(event, id) {
+        event.stopPropagation(); // ป้องกันไม่ให้การ์ดพลิกเวลากดปุ่มฟังเสียง
+        
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio.currentTime = 0;
+        }
+        
+        currentAudio = new Audio(`${id}.mp3`);
+        currentAudio.play().catch(e => console.log('Audio error:', e));
+    }
+</script>
+
+</body>
+</html>
