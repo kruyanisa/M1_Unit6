@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speaking Practice</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Sarabun:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://kruyanisa.github.io/classroom-core/quiz-config.js"></script>
+    <style>
+        :root {
+            --main-theme: #86efac; --dark-theme: #16a34a; --accent-theme: #14532d;
+            --shadow-3d: rgba(22, 163, 74, 0.15);
+        }
+        body { font-family: 'Sarabun', sans-serif; background: #f0f9ff; margin: 0; padding: 15px; color: #334155; }
+        h1 { font-family: 'Fredoka One', cursive; color: #0284c7; margin-bottom: 5px; font-size: 26px; text-align: center;}
+        h2 { font-size: 16px; color: #64748b; margin-top: 0; margin-bottom: 20px; text-align: center;}
+        
+        .profile-bar {
+            font-size: clamp(12px, 3.5vw, 14px); background: #dcfce7; border: 2px solid #86efac;
+            padding: 8px 15px; border-radius: 20px; color: var(--dark-theme); font-weight: bold;
+            display: flex; justify-content: center; align-items: center; gap: 10px; margin: 0 auto 20px auto; max-width: 600px;
+        }
+        .btn-switch { background: #fca5a5; color: white; border: none; padding: 4px 12px; border-radius: 12px; cursor: pointer; font-family: 'Sarabun'; font-weight: bold; }
+
+        .container { max-width: 600px; margin: 0 auto 20px auto; }
+        
+        .card {
+            background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 2px solid #e2e8f0; text-align: center;
+        }
+        .scene-img { width: 100%; max-width: 250px; border-radius: 15px; margin-bottom: 15px; object-fit: contain; }
+        
+        .controls { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; }
+        .btn-icon {
+            border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 24px; cursor: pointer;
+            display: flex; justify-content: center; align-items: center; transition: 0.2s; box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+        }
+        .btn-icon:active { transform: translateY(4px); box-shadow: none; }
+        
+        .btn-listen { background: #3b82f6; color: white; }
+        .btn-mic { background: #ef4444; color: white; }
+        .btn-mic.recording { background: #f87171; animation: pulse 1.5s infinite; }
+        .btn-hint { background: #eab308; color: white; }
+
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
+        .hint-box { display: none; background: #fef08a; padding: 10px; border-radius: 10px; color: #854d0e; font-weight: bold; margin-bottom: 15px; border: 2px dashed #ca8a04;}
+        .result-box { background: #f1f5f9; padding: 12px; border-radius: 10px; min-height: 45px; border: 2px solid #cbd5e1; font-size: 16px; color: #475569; display: flex; align-items: center; justify-content: center; font-style: italic; }
+        .result-box.correct { background: #dcfce7; border-color: #22c55e; color: #15803d; font-weight: bold; font-style: normal; }
+
+        .btn-submit { background: #22c55e; color: white; border: none; padding: 15px 20px; font-size: 20px; border-radius: 15px; cursor: pointer; font-weight: 800; width: 100%; box-shadow: 0 4px 0 #16a34a; font-family: 'Sarabun'; transition: 0.1s;}
+        .btn-submit:active { transform: translateY(4px); box-shadow: none; }
+        
+        /* Modals */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(240,253,244,0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 2000; visibility: hidden; opacity: 0; transition: opacity 0.3s; padding: 15px; box-sizing: border-box; }
+        .modal-overlay.active { visibility: visible; opacity: 1; }
+        .modal-box { background: white; padding: 30px 20px; border-radius: 30px; text-align: center; width: 100%; max-width: 340px; border: 4px solid var(--main-theme); box-shadow: 8px 12px 25px var(--shadow-3d); box-sizing: border-box; }
+        .modal-box input { width: 100%; padding: 12px; margin-bottom: 12px; border: 2px solid var(--main-theme); border-radius: 15px; text-align: center; font-family: 'Sarabun'; font-size: 16px; font-weight: 600; box-sizing: border-box; outline: none; }
+        .modal-box input:focus { border-color: var(--dark-theme); }
+        .btn-action { width: 100%; padding: 14px; background: var(--main-theme); color: var(--accent-theme); border: none; border-radius: 15px; font-weight: 800; cursor: pointer; font-family: 'Sarabun'; box-shadow: 0 4px 0 var(--dark-theme); transition: 0.1s; font-size: 17px; }
+        .btn-action:active { transform: translateY(3px); box-shadow: none; }
+        .score-num { font-size: 55px; font-weight: 900; color: var(--dark-theme); margin: 10px 0; display: block; }
+    </style>
+</head>
+<body>
+
+    <div id="userProfile" class="profile-bar" style="display:none;">
+        <span>👤 <span id="p_name"></span> | 🏫 <span id="p_room"></span> | 🆔 <span id="p_id"></span></span>
+        <button class="btn-switch" onclick="switchAccount()">🔄 สลับ</button>
+    </div>
+
+    <div class="container">
+        <h1>Speaking Practice</h1>
+        <h2>ม.1 Unit 6: Describe the pictures</h2>
+
+        <!-- Item 1 -->
+        <div class="card" id="card-q1">
+            <img src="speaking_winter.jpg" alt="Winter" class="scene-img">
+            <div class="controls">
+                <button class="btn-icon btn-listen" onclick="speak('Look at picture A. What are the girls doing?')" title="ฟังคำถาม">🔊</button>
+                <button class="btn-icon btn-hint" onclick="toggleHint('hint1')" title="คำใบ้">💡</button>
+                <button class="btn-icon btn-mic" id="mic1" onclick="startDictation('q1')" title="พูดคำตอบ">🎤</button>
+            </div>
+            <div id="hint1" class="hint-box">They are m_king a sn_wman.</div>
+            <div id="res-q1" class="result-box">กดปุ่มไมค์ 🎤 แล้วพูดภาษาอังกฤษ</div>
+        </div>
+
+        <!-- Item 2 -->
+        <div class="card" id="card-q2">
+            <img src="speaking_spring.jpg" alt="Spring" class="scene-img">
+            <div class="controls">
+                <button class="btn-icon btn-listen" onclick="speak('Look at picture B. What is the family doing?')" title="ฟังคำถาม">🔊</button>
+                <button class="btn-icon btn-hint" onclick="toggleHint('hint2')" title="คำใบ้">💡</button>
+                <button class="btn-icon btn-mic" id="mic2" onclick="startDictation('q2')" title="พูดคำตอบ">🎤</button>
+            </div>
+            <div id="hint2" class="hint-box">A family is w_lking in a p_rk.</div>
+            <div id="res-q2" class="result-box">กดปุ่มไมค์ 🎤 แล้วพูดภาษาอังกฤษ</div>
+        </div>
+
+        <!-- Item 3 -->
+        <div class="card" id="card-q3">
+            <img src="speaking_summer.jpg" alt="Summer" class="scene-img">
+            <div class="controls">
+                <button class="btn-icon btn-listen" onclick="speak('Look at picture C. What is the boy doing?')" title="ฟังคำถาม">🔊</button>
+                <button class="btn-icon btn-hint" onclick="toggleHint('hint3')" title="คำใบ้">💡</button>
+                <button class="btn-icon btn-mic" id="mic3" onclick="startDictation('q3')" title="พูดคำตอบ">🎤</button>
+            </div>
+            <div id="hint3" class="hint-box">A boy is sw_mming in the s_a.</div>
+            <div id="res-q3" class="result-box">กดปุ่มไมค์ 🎤 แล้วพูดภาษาอังกฤษ</div>
+        </div>
+
+        <!-- Item 4 -->
+        <div class="card" id="card-q4">
+            <img src="speaking_autumn.jpg" alt="Autumn" class="scene-img">
+            <div class="controls">
+                <button class="btn-icon btn-listen" onclick="speak('Look at picture D. What is the man doing?')" title="ฟังคำถาม">🔊</button>
+                <button class="btn-icon btn-hint" onclick="toggleHint('hint4')" title="คำใบ้">💡</button>
+                <button class="btn-icon btn-mic" id="mic4" onclick="startDictation('q4')" title="พูดคำตอบ">🎤</button>
+            </div>
+            <div id="hint4" class="hint-box">A man is h_lding an _mbrella.</div>
+            <div id="res-q4" class="result-box">กดปุ่มไมค์ 🎤 แล้วพูดภาษาอังกฤษ</div>
+        </div>
+
+        <button class="btn-submit" onclick="gradeQuiz()">✅ ส่งคะแนน</button>
+    </div>
+
+    <!-- Modals (เหมือนเดิม) -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal-box">
+            <h2 id="modalTitle" style="color:var(--dark-theme); margin-top:0; font-size: 24px;">📝 ลงชื่อเข้าเรียน</h2>
+            <p id="modalSub" style="color: #6b7280; font-weight: 600; margin-top: 0; display:none; font-size: 14px;"></p>
+            <input type="text" id="in_name" placeholder="ชื่อ - นามสกุล">
+            <input type="text" id="in_room" placeholder="ชั้น/ห้อง (เช่น 1/1)">
+            <input type="text" id="in_id" placeholder="รหัสนักเรียน (5 หลัก)" maxlength="5">
+            <button class="btn-action" onclick="confirmUser()">🚀 ยืนยันข้อมูล</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="scoreModal">
+        <div class="modal-box">
+            <h2 style="color:var(--dark-theme); margin-top:0; font-size: 26px;">🎉 ส่งคำตอบแล้ว!</h2>
+            <p style="color: #6b7280; font-weight: 600;">คะแนนของคุณคือ</p>
+            <span class="score-num"><span id="finalScoreText">0</span> / 4</span>
+            <div id="saveStatus" style="font-weight:bold; font-size:15px; margin-bottom:15px; color:#15803d;"></div>
+            <button class="btn-action" onclick="location.reload()" style="display:none;" id="playAgainBtn">🔄 ทำใหม่อีกครั้ง</button>
+        </div>
+    </div>
+
+<script>
+    const TOPIC_NAME = 'ม.1 Unit 6 Year after year Speaking';
+    const MAX_Q = 4;
+    let score = 0;
+    
+    // ตั้งค่า Keywords ที่ต้องการให้มีในประโยคที่เด็กพูด
+    const answerKeys = {
+        q1: ['making', 'snowman'],
+        q2: ['walking', 'park'],
+        q3: ['swimming'],
+        q4: ['holding', 'umbrella']
+    };
+    
+    // เก็บสถานะว่าข้อไหนผ่านแล้ว
+    let studentResults = { q1: false, q2: false, q3: false, q4: false };
+
+    window.onload = () => { 
+        checkLoginStatus(); 
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            Swal.fire('คำเตือน', 'เบราว์เซอร์ของคุณไม่รองรับระบบสั่งงานด้วยเสียง กรุณาใช้ Google Chrome หรือ Safari', 'warning');
+        }
+    };
+
+    function toggleHint(id) {
+        const el = document.getElementById(id);
+        el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+    }
+
+    function speak(text) {
+        const msg = new SpeechSynthesisUtterance();
+        msg.text = text;
+        msg.lang = 'en-US';
+        msg.rate = 0.9; // พูดช้าลงนิดนึงให้เด็กฟังทัน
+        window.speechSynthesis.speak(msg);
+    }
+
+    function startDictation(qId) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) return;
+
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        const micBtn = document.getElementById('mic' + qId.replace('q', ''));
+        const resBox = document.getElementById('res-' + qId);
+        
+        micBtn.classList.add('recording');
+        resBox.innerText = "กำลังฟัง...";
+        resBox.classList.remove('correct');
+
+        recognition.start();
+
+        recognition.onresult = function(event) {
+            const transcript = event.results[0][0].transcript.toLowerCase();
+            resBox.innerText = `"${transcript}"`;
+            
+            // ตรวจสอบ Keywords
+            let isCorrect = true;
+            answerKeys[qId].forEach(keyword => {
+                if (!transcript.includes(keyword)) isCorrect = false;
+            });
+
+            if (isCorrect) {
+                resBox.classList.add('correct');
+                studentResults[qId] = true;
+                Swal.fire({ title: 'Very Good! 🌟', timer: 1500, showConfirmButton: false, icon: 'success' });
+            } else {
+                studentResults[qId] = false;
+                Swal.fire({ title: 'Try again!', text: 'ลองพูดใหม่อีกครั้งนะ', timer: 1500, showConfirmButton: false, icon: 'info' });
+            }
+        };
+
+        recognition.onerror = function(event) {
+            resBox.innerText = "ไม่ค่อยได้ยินเลย ลองพูดใหม่นะ";
+            micBtn.classList.remove('recording');
+        };
+
+        recognition.onend = function() {
+            micBtn.classList.remove('recording');
+        };
+    }
+
+    function gradeQuiz() {
+        score = 0;
+        for (let key in studentResults) {
+            if (studentResults[key]) score++;
+        }
+
+        if(!localStorage.getItem('studentId')) {
+            document.getElementById('modalTitle').innerText = "👋 ส่งงาน!";
+            document.getElementById('modalSub').innerText = `ได้คะแนน ${score}/${MAX_Q} กรอกข้อมูลเพื่อบันทึก`;
+            document.getElementById('modalSub').style.display = 'block';
+            document.getElementById('loginModal').classList.add('active');
+        } else { 
+            submitScore(); 
+        }
+    }
+
+    // --- ส่วนจัดการบัญชีและ Google Sheets (เหมือนเดิม) ---
+    function checkLoginStatus() {
+        if(localStorage.getItem('studentId')) {
+            document.getElementById('userProfile').style.display = 'flex';
+            document.getElementById('p_name').innerText = localStorage.getItem('studentName');
+            document.getElementById('p_room').innerText = localStorage.getItem('studentRoom');
+            document.getElementById('p_id').innerText = localStorage.getItem('studentId'); 
+        } else {
+            document.getElementById('userProfile').style.display = 'none';
+        }
+    }
+
+    function switchAccount() {
+        Swal.fire({
+            title: '⚠️ เปลี่ยนคนเล่น?', text: "ข้อมูลเดิมจะถูกสลับออกนะ", icon: 'warning',
+            showCancelButton: true, confirmButtonColor: '#16a34a', cancelButtonColor: '#9ca3af',
+            confirmButtonText: 'ตกลง', cancelButtonText: 'ยกเลิก'
+        }).then((res) => {
+            if(res.isConfirmed) {
+                localStorage.clear();
+                document.getElementById('in_name').value = ''; 
+                document.getElementById('in_room').value = ''; 
+                document.getElementById('in_id').value = '';
+                document.getElementById('modalTitle').innerText = "🔄 ลงชื่อบัญชีใหม่";
+                document.getElementById('modalSub').style.display = 'block';
+                checkLoginStatus(); 
+                document.getElementById('loginModal').classList.add('active');
+            }
+        });
+    }
+
+    document.getElementById('in_room').addEventListener('blur', function() {
+        let nums = this.value.match(/\d+/g);
+        if (nums && nums.length >= 2) this.value = `ม.${nums[0]}/${nums[1]}`;
+        else if (nums && nums.length === 1) this.value = `ม.1/${nums[0]}`;
+    });
+
+    function confirmUser() {
+        let n = document.getElementById('in_name').value.trim();
+        let r = document.getElementById('in_room').value.trim();
+        let id = document.getElementById('in_id').value.trim();
+        if(!n || !r || id.length !== 5) { Swal.fire('ข้อมูลไม่ครบ!', 'กรุณากรอกชื่อ ห้อง และรหัส 5 หลัก', 'warning'); return; }
+        
+        localStorage.setItem('studentName', n); 
+        localStorage.setItem('studentRoom', r); 
+        localStorage.setItem('studentId', id);
+        
+        document.getElementById('loginModal').classList.remove('active'); 
+        checkLoginStatus();
+    }
+
+    function submitScore() {
+        document.getElementById('scoreModal').classList.add('active');
+        document.getElementById('finalScoreText').innerText = score;
+        const stat = document.getElementById('saveStatus');
+        const playAgainBtn = document.getElementById('playAgainBtn');
+
+        if(typeof QUIZ_CONFIG === 'undefined' || !QUIZ_CONFIG.SCRIPT_URL) {
+            stat.innerText = "❌ ไม่พบไฟล์ตั้งค่าการเชื่อมต่อ"; 
+            playAgainBtn.style.display = 'block'; return;
+        }
+
+        stat.innerText = "⏳ กำลังส่งคะแนน...";
+        playAgainBtn.style.display = 'none';
+
+        const payload = {
+            name: localStorage.getItem('studentName'), 
+            room: localStorage.getItem('studentRoom'),
+            studentId: "'" + localStorage.getItem('studentId'), 
+            lesson: TOPIC_NAME, 
+            score: score, 
+            maxScore: MAX_Q
+        };
+
+        fetch(QUIZ_CONFIG.SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }).catch(e => console.error(e));
+
+        setTimeout(() => {
+            stat.innerText = "✅ บันทึกคะแนนลงระบบเรียบร้อย!"; 
+            stat.style.color = "#15803d";
+            playAgainBtn.style.display = 'block';
+        }, 2000);
+    }
+</script>
+</body>
+</html>
