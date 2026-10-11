@@ -1,1 +1,389 @@
 
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocabulary: Clothes & Accessories</title>
+    <!-- Tailwind CSS for layout and utilities -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Sarabun:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --secondary: #8b5cf6;
+            --accent: #f59e0b;
+        }
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: #f0f9ff;
+            color: #334155;
+            margin: 0;
+            padding: 10px;
+        }
+        h1 {
+            font-family: 'Fredoka One', cursive;
+            color: var(--primary);
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+        h2 {
+            text-align: center;
+            color: #64748b;
+            font-size: 16px;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        /* App Container */
+        .app-container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        /* Tabs */
+        .tabs-container {
+            display: flex;
+            overflow-x: auto;
+            gap: 10px;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            /* Hide scrollbar */
+            -ms-overflow-style: none;  
+            scrollbar-width: none;  
+        }
+        .tabs-container::-webkit-scrollbar { 
+            display: none; 
+        }
+        
+        .tab-btn {
+            flex: 0 0 auto;
+            background: #e2e8f0;
+            color: #475569;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 15px;
+            font-family: 'Fredoka One', cursive;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* Image Display Area */
+        .image-wrapper {
+            position: relative;
+            width: 100%;
+            /* Enforce 9:16 aspect ratio approximately */
+            aspect-ratio: 9 / 16;
+            background: #f1f5f9;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 3px solid #e2e8f0;
+        }
+        .character-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            transition: opacity 0.3s;
+        }
+
+        /* Vocabulary Labels */
+        .vocab-label {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            border-radius: 20px;
+            padding: 6px 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+        .vocab-label:hover {
+            transform: scale(1.05);
+            background: var(--primary);
+            color: white;
+        }
+        .vocab-label:active {
+            transform: scale(0.95);
+        }
+        
+        /* Audio Icon styling */
+        .audio-icon {
+            font-size: 18px;
+            background: #dbeafe;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .vocab-label:hover .audio-icon {
+            background: white;
+            color: var(--primary);
+        }
+
+        /* Translation Pop (temporary state) */
+        .vocab-label.show-translation {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+        .vocab-label.show-translation .audio-icon {
+            background: white;
+            color: var(--accent);
+        }
+
+        /* Pointer Arrows */
+        .vocab-label.point-right::after {
+            content: '';
+            position: absolute;
+            right: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+            border-left: 8px solid var(--primary);
+            transition: border-left-color 0.2s;
+        }
+        .vocab-label.point-right:hover::after { border-left-color: var(--primary); }
+        .vocab-label.point-right.show-translation::after { border-left-color: var(--accent); }
+
+        .vocab-label.point-left::after {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+            border-right: 8px solid var(--primary);
+            transition: border-right-color 0.2s;
+        }
+        .vocab-label.point-left:hover::after { border-right-color: var(--primary); }
+        .vocab-label.point-left.show-translation::after { border-right-color: var(--accent); }
+
+        .instruction {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 600;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <h1>Dress Right!</h1>
+        <h2>Vocabulary - Clothes & Accessories</h2>
+
+        <!-- Tabs Container -->
+        <div class="tabs-container" id="tabsContainer">
+            <!-- Tabs will be injected here via JS -->
+        </div>
+
+        <!-- Image and Labels Area -->
+        <div class="image-wrapper" id="imageWrapper">
+            <img src="" alt="Character" class="character-img" id="characterImg" onerror="this.src='https://placehold.co/450x800/e2e8f0/64748b?text=Image+Not+Found'">
+            
+            <!-- Labels will be injected here via JS -->
+            <div id="labelsContainer"></div>
+        </div>
+        
+        <div class="instruction">
+            <span>💡</span> แตะที่ป้ายคำศัพท์เพื่อฟังเสียงและดูคำแปล
+        </div>
+    </div>
+
+    <script>
+        // Data structure containing characters, their image, and vocabulary items.
+        // Positions (top, left, right) are in percentages for responsive layout.
+        const charactersData = {
+            Steve: {
+                image: "Steve.jpg",
+                items: [
+                    { word: "T-shirt", thai: "เสื้อยืด", audio: "T-shirt.mp3", top: "30%", left: "5%", align: "point-right" },
+                    { word: "shorts", thai: "กางเกงขาสั้น", audio: "shorts.mp3", top: "55%", left: "5%", align: "point-right" },
+                    { word: "socks", thai: "ถุงเท้า", audio: "socks.mp3", top: "80%", left: "5%", align: "point-right" },
+                    { word: "trainers", thai: "รองเท้าผ้าใบ", audio: "trainers.mp3", top: "90%", right: "5%", align: "point-left" }
+                ]
+            },
+            Ann: {
+                image: "Ann.jpg",
+                items: [
+                    { word: "jacket", thai: "เสื้อแจ็คเก็ต", audio: "jacket.mp3", top: "30%", left: "5%", align: "point-right" },
+                    { word: "blouse", thai: "เสื้อสตรี", audio: "blouse.mp3", top: "45%", right: "5%", align: "point-left" },
+                    { word: "skirt", thai: "กระโปรง", audio: "skirt.mp3", top: "60%", left: "5%", align: "point-right" },
+                    { word: "shoes", thai: "รองเท้า", audio: "shoes.mp3", top: "85%", right: "5%", align: "point-left" }
+                ]
+            },
+            Laura: {
+                image: "Laura.jpg",
+                items: [
+                    { word: "raincoat", thai: "เสื้อกันฝน", audio: "raincoat.mp3", top: "50%", right: "5%", align: "point-left" },
+                    { word: "shoes", thai: "รองเท้า", audio: "shoes.mp3", top: "85%", left: "5%", align: "point-right" }
+                ]
+            },
+            Jim: {
+                image: "Jim.jpg",
+                items: [
+                    { word: "shirt", thai: "เสื้อเชิ้ต", audio: "shirt.mp3", top: "25%", left: "5%", align: "point-right" },
+                    { word: "tie", thai: "เนคไท", audio: "tie.mp3", top: "38%", right: "5%", align: "point-left" },
+                    { word: "suit", thai: "ชุดสูท", audio: "suit.mp3", top: "55%", left: "5%", align: "point-right" }
+                ]
+            },
+            Betty: {
+                image: "Betty.jpg",
+                items: [
+                    { word: "dress", thai: "ชุดเดรส", audio: "dress.mp3", top: "45%", left: "5%", align: "point-right" },
+                    { word: "gloves", thai: "ถุงมือ", audio: "gloves.mp3", top: "65%", right: "5%", align: "point-left" }
+                ]
+            },
+            Tony: {
+                image: "Tony.jpg",
+                items: [
+                    { word: "scarf", thai: "ผ้าพันคอ", audio: "scarf.mp3", top: "30%", right: "5%", align: "point-left" },
+                    { word: "jeans", thai: "กางเกงยีนส์", audio: "jeans.mp3", top: "65%", left: "5%", align: "point-right" },
+                    { word: "boots", thai: "รองเท้าบูท", audio: "boots.mp3", top: "85%", right: "5%", align: "point-left" }
+                ]
+            }
+        };
+
+        const charNames = Object.keys(charactersData);
+        let activeChar = charNames[0]; // Start with Steve
+        let currentlyPlaying = null;
+
+        function initApp() {
+            renderTabs();
+            loadCharacter(activeChar);
+        }
+
+        function renderTabs() {
+            const tabsContainer = document.getElementById('tabsContainer');
+            tabsContainer.innerHTML = '';
+            
+            charNames.forEach(name => {
+                const btn = document.createElement('button');
+                btn.className = `tab-btn ${name === activeChar ? 'active' : ''}`;
+                btn.innerText = name;
+                btn.onclick = () => {
+                    activeChar = name;
+                    updateTabsStyle();
+                    loadCharacter(name);
+                };
+                tabsContainer.appendChild(btn);
+            });
+        }
+
+        function updateTabsStyle() {
+            const btns = document.querySelectorAll('.tab-btn');
+            btns.forEach(btn => {
+                if (btn.innerText === activeChar) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        function loadCharacter(name) {
+            const charData = charactersData[name];
+            const imgEl = document.getElementById('characterImg');
+            const labelsContainer = document.getElementById('labelsContainer');
+            
+            // Fade out effect
+            imgEl.style.opacity = 0.5;
+            
+            setTimeout(() => {
+                imgEl.src = charData.image;
+                imgEl.style.opacity = 1;
+                
+                // Clear old labels
+                labelsContainer.innerHTML = '';
+                
+                // Create new labels
+                charData.items.forEach((item, index) => {
+                    const label = document.createElement('div');
+                    label.className = `vocab-label ${item.align}`;
+                    
+                    // Set positioning
+                    label.style.top = item.top;
+                    if (item.left) label.style.left = item.left;
+                    if (item.right) label.style.right = item.right;
+                    
+                    // Internal HTML
+                    label.innerHTML = `
+                        <div class="audio-icon">🎧</div>
+                        <span class="word-text">${item.word}</span>
+                    `;
+                    
+                    // Click event to play audio and show Thai
+                    label.onclick = () => playVocab(item, label);
+                    
+                    labelsContainer.appendChild(label);
+                });
+            }, 150); // slight delay for smooth visual transition
+        }
+
+        function playVocab(itemData, labelElement) {
+            // Stop previously playing audio if any
+            if (currentlyPlaying) {
+                currentlyPlaying.pause();
+                currentlyPlaying.currentTime = 0;
+            }
+
+            try {
+                // Play new audio
+                const audio = new Audio(itemData.audio);
+                audio.play().catch(e => console.log("Audio file not found or browser blocked playback:", itemData.audio));
+                currentlyPlaying = audio;
+            } catch (error) {
+                console.error("Error initializing audio", error);
+            }
+
+            // Visual feedback: Change to Thai translation temporarily
+            const textSpan = labelElement.querySelector('.word-text');
+            const originalWord = itemData.word;
+            
+            labelElement.classList.add('show-translation');
+            textSpan.innerText = itemData.thai;
+            
+            // Revert back after 2.5 seconds
+            setTimeout(() => {
+                labelElement.classList.remove('show-translation');
+                textSpan.innerText = originalWord;
+            }, 2500);
+        }
+
+        // Initialize the app on load
+        window.onload = initApp;
+
+    </script>
+</body>
+</html>
