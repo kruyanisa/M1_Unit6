@@ -59,6 +59,10 @@
             /* Hide scrollbar */
             -ms-overflow-style: none;  
             scrollbar-width: none;  
+            cursor: grab; /* เพิ่ม cursor ให้รู้ว่าลากได้ */
+        }
+        .tabs-container:active {
+            cursor: grabbing;
         }
         .tabs-container::-webkit-scrollbar { 
             display: none; 
@@ -283,6 +287,39 @@
         function initApp() {
             renderTabs();
             loadCharacter(activeChar);
+            enableTabScroll(); // เรียกใช้ฟังก์ชัน Scroll ซ้ายขวา
+        }
+
+        // ฟังก์ชันใหม่สำหรับจัดการการ Scroll ของ Tab Container
+        function enableTabScroll() {
+            const slider = document.getElementById('tabsContainer');
+            let isDown = false;
+            let startX;
+            let scrollLeft;
+
+            // ลากด้วยเมาส์ (Mouse Drag)
+            slider.addEventListener('mousedown', (e) => {
+                isDown = true;
+                startX = e.pageX - slider.offsetLeft;
+                scrollLeft = slider.scrollLeft;
+            });
+            slider.addEventListener('mouseleave', () => { isDown = false; });
+            slider.addEventListener('mouseup', () => { isDown = false; });
+            slider.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - slider.offsetLeft;
+                const walk = (x - startX) * 2; // ความเร็วในการลาก
+                slider.scrollLeft = scrollLeft - walk;
+            });
+
+            // เลื่อนด้วยลูกกลิ้งเมาส์ (Mouse Wheel)
+            slider.addEventListener('wheel', (e) => {
+                if (e.deltaY !== 0) {
+                    e.preventDefault();
+                    slider.scrollLeft += e.deltaY;
+                }
+            });
         }
 
         function renderTabs() {
