@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M.1 Unit 6 Dress right Vocab</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Sarabun:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- นำเข้า quiz-config.js สำหรับบันทึกคะแนน -->
+    <script src="quiz-config.js"></script>
+    <style>
+        body { font-family: 'Sarabun', sans-serif; background-color: #f0f9ff; color: #334155; margin: 0; padding: 15px; }
+        h1 { font-family: 'Fredoka One', cursive; color: #3b82f6; text-align: center; font-size: 24px; margin-bottom: 5px; }
+        h2 { text-align: center; color: #64748b; font-size: 16px; margin-top: 0; margin-bottom: 20px; }
+        .app-container { max-width: 500px; margin: 0 auto; background: white; border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .hidden { display: none !important; }
+        .choice-btn { width: 100%; text-align: left; background: #f8fafc; border: 2px solid #e2e8f0; padding: 15px; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s; margin-bottom: 10px; }
+        .choice-btn:hover { background: #eff6ff; border-color: #3b82f6; }
+        .choice-btn.correct { background: #dcfce7; border-color: #22c55e; color: #166534; }
+        .choice-btn.wrong { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
+        .choice-btn:disabled { cursor: not-allowed; }
+        .audio-btn { background: #3b82f6; color: white; border: none; border-radius: 50%; width: 60px; height: 60px; font-size: 24px; display: flex; justify-content: center; align-items: center; margin: 0 auto 20px; cursor: pointer; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4); }
+        .audio-btn:active { transform: scale(0.95); }
+        .vocab-display { font-family: 'Fredoka One', cursive; font-size: 32px; text-align: center; color: #1e293b; margin-bottom: 20px; }
+        .progress-text { text-align: center; font-weight: 600; color: #64748b; margin-bottom: 15px; }
+        input { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; margin-bottom: 15px; font-family: 'Sarabun'; font-size: 16px; }
+        .primary-btn { width: 100%; background: #3b82f6; color: white; font-weight: 800; font-size: 18px; padding: 15px; border: none; border-radius: 12px; cursor: pointer; transition: 0.2s; }
+        .primary-btn:hover { background: #2563eb; }
+        .table-container { max-height: 300px; overflow-y: auto; margin-bottom: 20px; border: 1px solid #e2e8f0; border-radius: 10px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: left; }
+        th { background: #f1f5f9; font-weight: bold; position: sticky; top: 0; }
+        .mistake-row { color: #ef4444; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <h1>Vocab Game</h1>
+        <h2>M.1 Unit 6 Dress right</h2>
+
+        <!-- หน้าเข้าสู่ระบบ -->
+        <div id="loginScreen">
+            <input type="text" id="studentName" placeholder="ชื่อ-นามสกุล" required>
+            <input type="text" id="studentClass" placeholder="ชั้น (เช่น ม.1/1)" required>
+            <input type="number" id="studentNumber" placeholder="เลขที่" required>
+            <button class="primary-btn" onclick="startQuiz()">เริ่มทำแบบทดสอบ</button>
+        </div>
+
+        <!-- หน้าเล่นเกม -->
+        <div id="quizScreen" class="hidden">
+            <div class="progress-text" id="progressText">ข้อ 1 / 24</div>
+            <button class="audio-btn" onclick="playVocabAudio()">🎧</button>
+            <div class="vocab-display" id="vocabText">Word</div>
+            <div id="choicesContainer"></div>
+        </div>
+
+        <!-- หน้าสรุปผล -->
+        <div id="resultScreen" class="hidden">
+            <h2 style="font-size: 24px; color: #3b82f6; margin-bottom: 10px;">สรุปคะแนน</h2>
+            <div class="vocab-display" id="finalScore" style="color: #22c55e;">0 / 24</div>
+            
+            <h3 style="font-size: 16px; color: #64748b; margin-bottom: 10px;">คำศัพท์ที่ตอบผิด (ต้องฝึกเพิ่มนะ!)</h3>
+            <div class="table-container">
+                <table id="mistakeTable">
+                    <thead>
+                        <tr>
+                            <th>คำศัพท์</th>
+                            <th>คำแปลที่ถูกต้อง</th>
+                        </tr>
+                    </thead>
+                    <tbody id="mistakeBody"></tbody>
+                </table>
+            </div>
+
+            <button class="primary-btn" style="margin-bottom: 10px; background: #22c55e;" onclick="submitScore()">บันทึกคะแนน</button>
+            <button class="primary-btn" style="background: #f59e0b;" onclick="restartQuiz()">เริ่มทำใหม่</button>
+        </div>
+    </div>
+
+    <!-- เสียงเอฟเฟกต์ (ต้องมีไฟล์ในโฟลเดอร์) -->
+    <audio id="sfxCorrect" src="correct.mp3"></audio>
+    <audio id="sfxWrong" src="wrong.mp3"></audio>
+    <audio id="vocabAudio" src=""></audio>
+
+    <script>
+        const vocabData = [
+            { word: "T-shirt", thai: "เสื้อยืด", audio: "T-shirt.mp3" },
+            { word: "shorts", thai: "กางเกงขาสั้น", audio: "shorts.mp3" },
+            { word: "socks", thai: "ถุงเท้า", audio: "socks.mp3" },
+            { word: "trainers", thai: "รองเท้าผ้าใบ / รองเท้ากีฬา", audio: "trainers.mp3" },
+            { word: "blouse", thai: "เสื้อสตรี", audio: "blouse.mp3" },
+            { word: "jacket", thai: "เสื้อแจ็คเก็ต", audio: "jacket.mp3" },
+            { word: "skirt", thai: "กระโปรง", audio: "skirt.mp3" },
+            { word: "shoes", thai: "รองเท้า", audio: "shoes.mp3" },
+            { word: "shirt", thai: "เสื้อเชิ้ต", audio: "shirt.mp3" },
+            { word: "suit", thai: "ชุดสูท", audio: "suit.mp3" },
+            { word: "tie", thai: "เนคไท", audio: "tie.mp3" },
+            { word: "raincoat", thai: "เสื้อกันฝน", audio: "raincoat.mp3" },
+            { word: "dress", thai: "ชุดเดรส", audio: "dress.mp3" },
+            { word: "gloves", thai: "ถุงมือ", audio: "gloves.mp3" },
+            { word: "scarf", thai: "ผ้าพันคอ", audio: "scarf.mp3" },
+            { word: "jeans", thai: "กางเกงยีนส์", audio: "jeans.mp3" },
+            { word: "boots", thai: "รองเท้าบูท", audio: "boots.mp3" },
+            { word: "light", thai: "บาง, น้ำหนักเบา", audio: "light.mp3" },
+            { word: "loose", thai: "หลวม, ไม่รัดรูป", audio: "loose.mp3" },
+            { word: "warm", thai: "อบอุ่น, ให้ความอบอุ่น", audio: "warm.mp3" },
+            { word: "How do I look in this?", thai: "ฉันใส่ชุดนี้/ตัวนี้แล้วดูเป็นไงบ้าง?", audio: "How_do_I_look_in_this.mp3" },
+            { word: "That looks terrible on you.", thai: "ชุดนั้นเธอใส่แล้วดูแย่มาก / ไม่เข้ากับเธอเลย", audio: "That_looks_terrible_on_you.mp3" },
+            { word: "What do you think of my ...?", thai: "เธอคิดยังไงกับ ... ของฉัน?", audio: "What_do_you_think_of_my.mp3" },
+            { word: "You look great/lovely.", thai: "เธอดูดีมาก / ดูน่ารักมากเลย", audio: "You_look_great_lovely.mp3" }
+        ];
+
+        let currentQuestions = [];
+        let currentIndex = 0;
+        let score = 0;
+        let mistakes = [];
+        let userInfo = {};
+
+        function startQuiz() {
+            const name = document.getElementById('studentName').value;
+            const cls = document.getElementById('studentClass').value;
+            const num = document.getElementById('studentNumber').value;
+            
+            if(!name || !cls || !num) {
+                alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+                return;
+            }
+
+            userInfo = { name, class: cls, number: num };
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('quizScreen').classList.remove('hidden');
+            
+            score = 0;
+            mistakes = [];
+            // สลับคำถาม
+            currentQuestions = [...vocabData].sort(() => 0.5 - Math.random());
+            currentIndex = 0;
+            
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (currentIndex >= currentQuestions.length) {
+                showResult();
+                return;
+            }
+
+            const q = currentQuestions[currentIndex];
+            document.getElementById('progressText').innerText = `ข้อ ${currentIndex + 1} / ${currentQuestions.length}`;
+            document.getElementById('vocabText').innerText = q.word;
+            
+            document.getElementById('vocabAudio').src = q.audio;
+            playVocabAudio();
+
+            // สร้างตัวเลือก
+            let choices = [q.thai];
+            let distractors = vocabData.map(v => v.thai).filter(t => t !== q.thai).sort(() => 0.5 - Math.random());
+            choices.push(distractors[0], distractors[1], distractors[2]);
+            choices.sort(() => 0.5 - Math.random());
+
+            const container = document.getElementById('choicesContainer');
+            container.innerHTML = '';
+            choices.forEach(choiceText => {
+                const btn = document.createElement('button');
+                btn.className = 'choice-btn';
+                btn.innerText = choiceText;
+                btn.onclick = () => checkAnswer(btn, choiceText, q);
+                container.appendChild(btn);
+            });
+        }
+
+        function playVocabAudio() {
+            const audio = document.getElementById('vocabAudio');
+            audio.currentTime = 0;
+            audio.play().catch(e => console.log("Audio not found"));
+        }
+
+        function checkAnswer(btn, selected, q) {
+            const allBtns = document.querySelectorAll('.choice-btn');
+            allBtns.forEach(b => b.disabled = true);
+
+            if (selected === q.thai) {
+                btn.classList.add('correct');
+                document.getElementById('sfxCorrect').play();
+                score++;
+            } else {
+                btn.classList.add('wrong');
+                document.getElementById('sfxWrong').play();
+                mistakes.push(q);
+                // เฉลยข้อถูก
+                allBtns.forEach(b => {
+                    if (b.innerText === q.thai) b.classList.add('correct');
+                });
+            }
+
+            setTimeout(() => {
+                currentIndex++;
+                loadQuestion();
+            }, 1500);
+        }
+
+        function showResult() {
+            document.getElementById('quizScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.remove('hidden');
+            document.getElementById('finalScore').innerText = `${score} / ${currentQuestions.length}`;
+
+            const tbody = document.getElementById('mistakeBody');
+            tbody.innerHTML = '';
+            if (mistakes.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="2" style="text-align:center; color:#22c55e;">เก่งมาก! ตอบถูกทุกข้อเลย 🎉</td></tr>';
+            } else {
+                mistakes.forEach(m => {
+                    tbody.innerHTML += `<tr class="mistake-row"><td>${m.word}</td><td>${m.thai}</td></tr>`;
+                });
+            }
+        }
+
+        function submitScore() {
+            // โค้ดส่วนนี้จะทำงานร่วมกับ quiz-config.js เพื่อส่งคะแนนเข้า Google Sheets
+            if(typeof recordScore === "function") {
+                recordScore(userInfo.name, userInfo.class, userInfo.number, score, currentQuestions.length);
+                alert("บันทึกคะแนนเรียบร้อยแล้ว!");
+            } else {
+                alert("ระบบบันทึกคะแนนกำลังทำงาน (ต้องเชื่อมต่อกับ quiz-config.js)");
+            }
+        }
+
+        function restartQuiz() {
+            startQuiz();
+        }
+    </script>
+</body>
+</html>
