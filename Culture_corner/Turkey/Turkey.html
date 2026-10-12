@@ -302,13 +302,18 @@
         function checkAnswer(selectedText) {
             let q = questions[currentQuestionIdx];
             
+            // ปิดการใช้งานปุ่มทั้งหมดชั่วคราวเพื่อป้องกันการกดซ้ำ
+            const buttons = document.querySelectorAll('.option-btn');
+            buttons.forEach(btn => btn.style.pointerEvents = 'none');
+            
             if (selectedText === q.correct) {
                 score++;
                 playCorrectSound();
                 Swal.fire({ title: 'ถูกต้อง!', text: 'เก่งมาก ฟังออกด้วย!', icon: 'success', timer: 1500, showConfirmButton: false }).then(nextQuestion);
             } else {
                 playWrongSound();
-                Swal.fire({ title: 'ผิดจ้า!', text: 'ตั้งใจฟังดีๆ นะ อันนั้นมันของฤดูอื่น!', icon: 'error', confirmButtonText: 'ลองฟังใหม่' });
+                // เปลี่ยนข้อความแจ้งเตือนเมื่อตอบผิด และไปข้อต่อไปอัตโนมัติ
+                Swal.fire({ title: 'ผิดจ้า!', text: 'ข้ามไปข้อต่อไปนะ', icon: 'error', timer: 1500, showConfirmButton: false }).then(nextQuestion);
             }
         }
 
