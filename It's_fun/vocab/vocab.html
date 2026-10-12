@@ -17,29 +17,23 @@
         .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 20px; padding: 25px 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         .hidden { display: none !important; }
         
-        /* Profile */
         .profile-bar { font-size: 14px; background: #ede9fe; border: 2px solid #ddd6fe; padding: 8px 15px; border-radius: 20px; color: var(--dark); font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px; }
         .btn-switch { background: #fca5a5; color: white; border: none; padding: 4px 12px; border-radius: 12px; cursor: pointer; font-family: 'Sarabun'; font-weight: bold; }
         
-        /* Game UI */
         .progress-text { text-align: center; color: #64748b; font-weight: bold; margin-bottom: 15px; }
         .hint-text { text-align: center; font-size: 24px; font-weight: 800; color: #1e293b; margin-bottom: 15px; }
         
         .audio-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; max-width: 250px; margin: 0 auto 25px auto; background: #fbbf24; color: #b45309; font-weight: bold; padding: 12px; border-radius: 20px; cursor: pointer; border: none; font-family: 'Sarabun'; font-size: 16px; box-shadow: 0 4px 0 #d97706; transition: 0.1s; }
         .audio-btn:active { transform: translateY(4px); box-shadow: none; }
         
-        /* Drop Zones (Answer Slots) */
         .slots-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-bottom: 30px; min-height: 45px; }
         .slot { width: 40px; height: 45px; border: 2px dashed #cbd5e1; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: bold; font-family: 'Fredoka One', sans-serif; color: var(--main); background: #f8fafc; cursor: pointer; transition: 0.2s; text-transform: lowercase; }
         .slot.filled { border: 2px solid var(--main); background: white; box-shadow: 0 2px 0 var(--main); }
         .slot.space { border: none; background: transparent; width: 15px; cursor: default; }
         
         .slot.correct-anim { border-color: #22c55e; color: #15803d; background: #dcfce7; box-shadow: 0 2px 0 #16a34a; }
-        .slot.wrong-anim { border-color: #ef4444; color: #b91c1c; background: #fee2e2; animation: shake 0.4s; }
+        .slot.wrong-anim { border-color: #ef4444; color: #b91c1c; background: #fee2e2; box-shadow: 0 2px 0 #b91c1c; }
 
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
-
-        /* Scrambled Letters */
         .letters-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; min-height: 50px; }
         .letter-chip { width: 45px; height: 50px; background: white; border: 2px solid #c4b5fd; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: bold; font-family: 'Fredoka One', sans-serif; color: var(--dark); cursor: pointer; box-shadow: 0 4px 0 #ddd6fe; transition: 0.1s; user-select: none; text-transform: lowercase; }
         .letter-chip:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
@@ -48,7 +42,6 @@
         .primary-btn { width: 100%; background: var(--main); color: white; font-weight: 800; font-size: 18px; padding: 15px; border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 0 var(--dark); margin-top: 10px; transition: 0.1s; }
         .primary-btn:active { transform: translateY(4px); box-shadow: none; }
 
-        /* Modals */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(245,243,255,0.9); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 2000; visibility: hidden; opacity: 0; transition: 0.3s; padding: 15px; }
         .modal-overlay.active { visibility: visible; opacity: 1; }
         .modal-box { background: white; padding: 30px 20px; border-radius: 20px; text-align: center; width: 100%; max-width: 320px; border: 4px solid var(--main); box-shadow: 0 10px 25px rgba(139,92,246,0.2); }
@@ -65,7 +58,6 @@
     <div class="container" id="gameContainer">
         <h1>It's fun! Vocab</h1>
         <div class="progress-text" id="progressText">ข้อ 1 / 10</div>
-        
         <div class="hint-text" id="hintText">คำแปลภาษาไทย</div>
 
         <button class="audio-btn" onclick="playCurrentAudio()">
@@ -74,8 +66,6 @@
 
         <div class="slots-container" id="slotsContainer"></div>
         <div class="letters-container" id="lettersContainer"></div>
-
-        <button class="primary-btn hidden" id="nextBtn" onclick="nextQuestion()">➡️ ข้อต่อไป</button>
     </div>
 
     <!-- Login Modal -->
@@ -92,8 +82,8 @@
     <!-- Score Modal -->
     <div class="modal-overlay" id="scoreModal">
         <div class="modal-box">
-            <h2 style="color:var(--dark); font-size: 24px; margin-top:0;">🎉 ยอดเยี่ยมมาก!</h2>
-            <p style="color: #64748b; font-weight: bold;">คุณทำเสร็จแล้ว คะแนนของคุณคือ</p>
+            <h2 style="color:var(--dark); font-size: 24px; margin-top:0;">🎉 ทำเสร็จแล้ว!</h2>
+            <p style="color: #64748b; font-weight: bold;">คะแนนของคุณคือ</p>
             <div style="font-size: 50px; font-weight: 900; color: var(--main); margin: 10px 0;"><span id="finalScore">0</span> / 10</div>
             <div id="saveStatus" style="font-weight:bold; color:#15803d; margin-bottom: 15px;"></div>
             <button class="primary-btn" onclick="location.reload()">🔄 เล่นอีกครั้ง</button>
@@ -116,8 +106,10 @@
         ];
 
         let currentIdx = 0;
+        let score = 0;
         let currentWord = "";
         let audioPlayer = new Audio();
+        let isChecking = false;
         
         window.onload = () => { 
             if(!localStorage.getItem('studentId')) {
@@ -157,19 +149,19 @@
 
         function initGame() {
             currentIdx = 0;
+            score = 0;
             loadQuestion();
         }
 
         function loadQuestion() {
+            isChecking = false;
             const data = vocabList[currentIdx];
             currentWord = data.word;
             audioPlayer.src = './' + data.audio;
             
             document.getElementById('progressText').innerText = `ข้อ ${currentIdx + 1} / ${vocabList.length}`;
             document.getElementById('hintText').innerText = data.th;
-            document.getElementById('nextBtn').classList.add('hidden');
             
-            // Build Slots
             const slotsContainer = document.getElementById('slotsContainer');
             slotsContainer.innerHTML = '';
             
@@ -192,7 +184,6 @@
                 }
             }
 
-            // Shuffle Letters
             lettersOnly = lettersOnly.sort(() => Math.random() - 0.5);
             
             const lettersContainer = document.getElementById('lettersContainer');
@@ -213,9 +204,8 @@
         }
 
         function placeLetter(chip) {
-            if(chip.classList.contains('used')) return;
+            if(chip.classList.contains('used') || isChecking) return;
             
-            // Find first empty slot
             const slots = document.querySelectorAll('.slot:not(.space)');
             let targetSlot = null;
             for(let slot of slots) {
@@ -230,13 +220,12 @@
                 targetSlot.dataset.filledId = chip.id;
                 targetSlot.classList.add('filled');
                 chip.classList.add('used');
-                
                 checkAnswer();
             }
         }
 
         function returnLetter(slot) {
-            if(slot.innerText === "" || slot.classList.contains('correct-anim')) return;
+            if(slot.innerText === "" || isChecking) return;
             
             let chipId = slot.dataset.filledId;
             let chip = document.getElementById(chipId);
@@ -244,7 +233,7 @@
             
             slot.innerText = "";
             slot.dataset.filledId = "";
-            slot.classList.remove('filled', 'wrong-anim');
+            slot.classList.remove('filled');
         }
 
         function checkAnswer() {
@@ -259,37 +248,35 @@
             
             if(!isFull) return;
             
+            isChecking = true;
             let expectedWord = currentWord.replace(/ /g, '').toLowerCase();
             
             if(currentAnswer.toLowerCase() === expectedWord) {
-                slots.forEach(slot => {
-                    slot.classList.remove('wrong-anim');
-                    slot.classList.add('correct-anim');
-                    slot.onclick = null; // lock
-                });
-                playBeep(800, 0.1); // Correct sound
-                document.getElementById('nextBtn').classList.remove('hidden');
+                score++;
+                slots.forEach(slot => slot.classList.add('correct-anim'));
+                playCorrectSound();
             } else {
                 slots.forEach(slot => {
                     slot.classList.add('wrong-anim');
-                    setTimeout(() => slot.classList.remove('wrong-anim'), 400);
+                    // แสดงเฉลยที่ถูกต้อง
+                    slot.innerText = slot.dataset.expected;
                 });
-                playBeep(200, 0.2); // Wrong sound
+                playWrongSound();
             }
-        }
 
-        function nextQuestion() {
-            currentIdx++;
-            if(currentIdx < vocabList.length) {
-                loadQuestion();
-            } else {
-                finishGame();
-            }
+            setTimeout(() => {
+                currentIdx++;
+                if(currentIdx < vocabList.length) {
+                    loadQuestion();
+                } else {
+                    finishGame();
+                }
+            }, 1500);
         }
 
         function finishGame() {
             document.getElementById('scoreModal').classList.add('active');
-            document.getElementById('finalScore').innerText = vocabList.length; // 10/10
+            document.getElementById('finalScore').innerText = score;
 
             const stat = document.getElementById('saveStatus');
             if(typeof QUIZ_CONFIG === 'undefined') { stat.innerText = "❌ ไม่พบการเชื่อมต่อ Sheet"; return; }
@@ -302,7 +289,7 @@
                     room: localStorage.getItem('studentRoom'), 
                     studentId: "'"+localStorage.getItem('studentId'), 
                     lesson: TOPIC_NAME, 
-                    score: vocabList.length, 
+                    score: score, 
                     maxScore: vocabList.length 
                 }) 
             }).catch(e=>{});
@@ -310,19 +297,27 @@
             setTimeout(() => { stat.innerText = "✅ บันทึกคะแนนเรียบร้อย!"; }, 1500);
         }
 
-        // --- Simple Sound Generator ---
+        // Web Audio API สำหรับสร้างเสียง
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playBeep(freq, duration) {
+        function playBeep(freq, duration, type = "sine") {
             if(audioCtx.state === 'suspended') audioCtx.resume();
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.connect(gain);
             gain.connect(audioCtx.destination);
             osc.frequency.value = freq;
-            osc.type = "sine";
+            osc.type = type;
             osc.start();
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
             osc.stop(audioCtx.currentTime + duration);
+        }
+        function playCorrectSound() {
+            playBeep(523.25, 0.1); // C5
+            setTimeout(() => playBeep(659.25, 0.2), 100); // E5
+        }
+        function playWrongSound() {
+            playBeep(250, 0.3, "sawtooth"); 
         }
     </script>
 </body>
