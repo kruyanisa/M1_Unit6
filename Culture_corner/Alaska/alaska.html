@@ -21,15 +21,17 @@
         .container { max-width: 950px; margin: 0 auto; background: white; border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         .hidden { display: none !important; }
         
-        h1 { font-family: 'Fredoka One', cursive; color: var(--main); text-align: center; font-size: 26px; margin: 5px 0 15px 0; }
+        h1 { font-family: 'Fredoka One', cursive; color: var(--main); text-align: center; font-size: 26px; margin: 5px 0 5px 0; }
         
         .profile-bar { font-size: 14px; background: #e0f2fe; border: 2px solid #bae6fd; padding: 8px 15px; border-radius: 20px; color: var(--dark); font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 15px; }
         .btn-switch { background: #fca5a5; color: white; border: none; padding: 4px 12px; border-radius: 12px; cursor: pointer; font-family: 'Sarabun'; font-weight: bold; }
 
+        .progress-indicator { text-align: center; font-size: 15px; font-weight: bold; color: #64748b; margin-bottom: 10px; }
+        
         .audio-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; max-width: 250px; margin: 0 auto 15px auto; background: #fbbf24; color: #b45309; font-weight: bold; padding: 10px; border-radius: 20px; cursor: pointer; border: none; font-size: 16px; box-shadow: 0 4px 0 #d97706; transition: 0.1s; }
         .audio-btn:active { transform: translateY(4px); box-shadow: none; }
 
-        .season-title { text-align: center; font-size: 22px; font-weight: 800; color: #1e293b; background: #fef08a; padding: 10px; border-radius: 12px; border: 2px dashed #ca8a04; margin-bottom: 20px; }
+        .season-title { text-align: center; font-size: 22px; font-weight: 800; color: #1e293b; background: #fef08a; padding: 10px; border-radius: 12px; border: 2px dashed #ca8a04; margin-bottom: 15px; }
         
         /* Layout ซ้าย-ขวา 16:9 Display */
         .display-grid {
@@ -59,7 +61,7 @@
         .card-label {
             position: absolute;
             bottom: 0; left: 0; width: 100%;
-            background: rgba(15, 23, 42, 0.75);
+            background: rgba(15, 23, 42, 0.8);
             color: white;
             font-size: 14px;
             font-weight: bold;
@@ -71,7 +73,7 @@
         .suitcase-overlay-area {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            padding: 20px;
+            padding: 15px;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 6px;
@@ -92,7 +94,7 @@
             background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 12px; padding: 15px; margin-top: 10px; text-align: left; font-size: 15px; color: #334155; line-height: 1.6; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
         }
 
-        /* ตู้เสื้อผ้าด้านล่าง */
+        /* ตู้เสื้อผ้าด้านล่าง (ขยายใหญ่ขึ้น) */
         .wardrobe-section {
             background: #f8fafc;
             border: 2px dashed #cbd5e1;
@@ -102,20 +104,20 @@
         }
         .wardrobe-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(65px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
+            gap: 12px;
         }
 
         .clothing-item {
             width: 100%; aspect-ratio: 1/1; 
-            background: white; border-radius: 8px; 
-            box-shadow: 0 3px 5px rgba(0,0,0,0.1); 
+            background: white; border-radius: 10px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
             cursor: pointer; transition: 0.2s;
             border: 2px solid #cbd5e1;
             overflow: hidden;
             display: flex; align-items: center; justify-content: center;
         }
-        .clothing-item img { width: 90%; height: 90%; object-fit: contain; }
+        .clothing-item img { width: 92%; height: 92%; object-fit: contain; }
         .clothing-item:active { transform: scale(0.9); }
         .clothing-item.in-suitcase { opacity: 0.3; transform: scale(0.85); pointer-events: none; }
 
@@ -139,6 +141,8 @@
     <div class="container" id="gameContainer">
         <h1>Alaska: Pack Your Suitcase</h1>
         
+        <div class="progress-indicator" id="progressIndicator">ข้อที่ 1 / 4</div>
+
         <button class="audio-btn" onclick="playArticleAudio()">
             <span>🔊</span> <span>ฟังบทความ Alaska</span>
         </button>
@@ -155,13 +159,13 @@
             <div class="visual-card" style="position: relative;">
                 <img src="suitcase.jpg" alt="Suitcase" onerror="this.src='https://via.placeholder.com/600x337?text=Suitcase'">
                 <div class="suitcase-overlay-area" id="suitcaseGrid"></div>
-                <div class="card-label">🎒 กระเป๋าเดินทาง (แตะเสื้อผ้าในตู้เพื่อเก็บเข้ากระเป๋า)</div>
+                <div class="card-label" id="suitcaseLabel">🎒 กระเป๋าเดินทาง (ต้องเลือกอีก 0 ชิ้น)</div>
             </div>
         </div>
 
-        <!-- Dialog เปิด-ปิดคำแนะนำบทความ -->
+        <!-- Dialog เปิด-ปิดคำแนะนำบทความ (แก้ข้อความตามต้นฉบับ) -->
         <div class="dialog-container">
-            <button class="dialog-toggle-btn" onclick="toggleDialog()">📖 เปิด/ปิด ข้อมูลและคำแนะนำบทความ</button>
+            <button class="dialog-toggle-btn" onclick="toggleDialog()">📖 เปิด/ปิด อ่านบทความ Alaska</button>
             <div class="dialog-box hidden" id="infoDialog">
                 <b>📌 Alaska Context:</b><br>
                 Alaska is in the north-west corner of North America. Temperatures in Alaska in the summer vary from 16°C to 27°C. Early mornings and night time are from 4°C to 10°C. Late August and September are cool. Winters are cold with lots of snow. If you decide to visit "The Great Land", make sure you pack the right clothes.
@@ -170,7 +174,7 @@
 
         <!-- ตู้เสื้อผ้า -->
         <div class="wardrobe-section">
-            <div style="font-weight: bold; color: #475569; margin-bottom: 8px;">👕 ตู้เสื้อผ้า (ครบทั้ง 11 ไอเทม)</div>
+            <div style="font-weight: bold; color: #475569; margin-bottom: 8px;">👕 ตู้เสื้อผ้า (ครบทั้ง 10 ไอเทม)</div>
             <div class="wardrobe-grid" id="wardrobeGrid"></div>
         </div>
 
@@ -201,7 +205,7 @@
     <script>
         const TOPIC_NAME = "ม.1 Unit 6 Culture Alaska travel";
         
-        // รายการไอเทมครบทั้ง 11 ไฟล์ตาม GitHub
+        // รายการไอเทมครบทั้ง 10 ชิ้น (ไม่รวมกระเป๋า)
         const allClothes = [
             { id: "short_shirt", img: "short-sleeved_shirt.jpg" },
             { id: "shorts", img: "shorts.jpg" },
@@ -278,8 +282,17 @@
 
         function loadSeason() {
             packedItems = [];
+            document.getElementById('progressIndicator').innerText = `ข้อที่ ${currentSeasonIdx + 1} / ${seasons.length}`;
             document.getElementById('seasonDisplay').innerText = `🌍 จัดกระเป๋าสำหรับ: ${seasons[currentSeasonIdx].name}`;
+            updateSuitcaseLabel();
             renderClothes();
+        }
+
+        function updateSuitcaseLabel() {
+            let requiredCount = seasons[currentSeasonIdx].req.length;
+            let remaining = requiredCount - packedItems.length;
+            if(remaining < 0) remaining = 0;
+            document.getElementById('suitcaseLabel').innerText = `🎒 กระเป๋าเดินทาง (ต้องเลือกอีก ${remaining} ชิ้น)`;
         }
 
         function renderClothes() {
@@ -301,6 +314,7 @@
                     suitcase.appendChild(suitcaseItem);
                 }
             });
+            updateSuitcaseLabel();
         }
 
         function toggleItem(id) {
