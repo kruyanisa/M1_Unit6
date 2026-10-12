@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Turkey: Listen & Pack!</title>
+    <title>Turkey: Listen & Choose!</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Sarabun:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -46,7 +45,7 @@
             display: grid;
             grid-template-columns: 1fr;
             gap: 15px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
         @media (min-width: 768px) {
             .display-grid { grid-template-columns: 1fr 1fr; }
@@ -66,69 +65,36 @@
             object-fit: cover;
             display: block;
         }
-        .card-label {
-            position: absolute;
-            bottom: 0; left: 0; width: 100%;
-            background: rgba(15, 23, 42, 0.8);
-            color: white;
-            font-size: 14px;
-            font-weight: bold;
-            padding: 6px 10px;
-            text-align: center;
+
+        /* โซนตัวเลือกคำตอบ 4 ข้อ */
+        .options-section {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        @media (min-width: 768px) {
+            .options-section { grid-template-columns: 1fr 1fr; }
         }
 
-        /* โซนกระเป๋าเดินทาง */
-        .suitcase-overlay-area {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            padding: 15px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            align-content: start;
-            justify-content: center;
-            overflow-y: auto;
-        }
-
-        /* ตู้เสื้อผ้า (เปลี่ยนเป็นแบบ Tag คำศัพท์) */
-        .wardrobe-section {
+        .option-btn {
             background: #f8fafc;
-            border: 2px dashed #cbd5e1;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-        .wardrobe-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        /* ป้ายคำศัพท์ Wording */
-        .clothing-item {
-            background: white; border-radius: 20px; 
-            box-shadow: 0 3px 5px rgba(0,0,0,0.1); 
-            cursor: pointer; transition: 0.2s;
             border: 2px solid #cbd5e1;
-            padding: 10px 18px;
-            font-size: 16px; font-weight: 700; color: #334155;
-            display: inline-block;
+            border-radius: 15px;
+            padding: 15px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #334155;
+            text-align: left;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            line-height: 1.5;
         }
-        .clothing-item:active { transform: scale(0.95); }
-        .clothing-item.in-suitcase { opacity: 0.4; transform: scale(0.9); pointer-events: none; border-color: #94a3b8; }
+        .option-btn:hover { background: #f1f5f9; border-color: #94a3b8; }
+        .option-btn:active { transform: scale(0.98); }
+
+        .primary-btn { width: 100%; background: var(--main); color: white; font-weight: 800; font-size: 18px; padding: 15px; border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 0 var(--dark); margin-top: 15px; transition: 0.1s; display: none; }
         
-        /* ป้ายคำศัพท์ในกระเป๋า (สีเด่นขึ้น) */
-        .suitcase-item {
-            background: #fef08a; border-radius: 20px; 
-            border: 2px solid #ca8a04; color: #854d0e;
-            padding: 6px 12px; font-size: 14px; font-weight: 700;
-            cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .primary-btn { width: 100%; background: var(--main); color: white; font-weight: 800; font-size: 18px; padding: 15px; border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 0 var(--dark); margin-top: 10px; transition: 0.1s; }
-        .primary-btn:active { transform: translateY(4px); box-shadow: none; }
-
         /* Modals */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(3px); display: flex; justify-content: center; align-items: center; z-index: 2000; visibility: hidden; opacity: 0; transition: 0.3s; padding: 15px; }
         .modal-overlay.active { visibility: visible; opacity: 1; }
@@ -144,36 +110,30 @@
     </div>
 
     <div class="container" id="gameContainer">
-        <h1>🇹🇷 Turkey: Listen & Pack!</h1>
+        <h1>🇹🇷 Turkey: Listen & Choose!</h1>
         
         <div class="progress-indicator" id="progressIndicator">ข้อที่ 1 / 4</div>
 
         <!-- ปุ่มฟังเสียง -->
         <button class="audio-btn" id="listenBtn" onclick="playQuestionAudio()">
-            <span style="font-size: 24px;">🎧</span> <span id="listenText">กดฟังคำสั่งจัดกระเป๋า!</span>
+            <span style="font-size: 24px;">🎧</span> <span id="listenText">กดฟังบทสนทนา</span>
         </button>
 
-        <!-- Layout 16:9 -->
+        <!-- Layout 16:9 ภาพประกอบ -->
         <div class="display-grid">
             <div class="visual-card">
                 <img src="BG_turkey.jpg" alt="Turkey Landscape" onerror="this.src='https://via.placeholder.com/600x337?text=Turkey+BG'">
-                <div class="card-label">🎈 บรรยากาศดินแดนตุรกี</div>
             </div>
             
-            <div class="visual-card" style="position: relative;">
-                <img src="Turkey.jpg" alt="Turkey Suitcase" onerror="this.src='https://via.placeholder.com/600x337?text=Turkey+Suitcase'">
-                <div class="suitcase-overlay-area" id="suitcaseGrid"></div>
-                <div class="card-label" id="suitcaseLabel">🎒 กระเป๋าเดินทาง (ฟังเสียงเพื่อจัดของ)</div>
+            <div class="visual-card">
+                <img src="Turkey.jpg" alt="Turkey Season" onerror="this.src='https://via.placeholder.com/600x337?text=Turkey+Table'">
             </div>
         </div>
 
-        <!-- ตู้เสื้อผ้า (ป้ายคำศัพท์) -->
-        <div class="wardrobe-section">
-            <div style="font-weight: bold; color: #475569; margin-bottom: 8px;">👕 ตู้เสื้อผ้า (เลือกคำศัพท์เฉพาะที่ได้ยิน!)</div>
-            <div class="wardrobe-grid" id="wardrobeGrid"></div>
-        </div>
+        <!-- โซนตัวเลือกคำตอบ -->
+        <div style="font-weight: bold; color: #475569; margin-bottom: 8px; font-size: 18px; text-align: center;">👇 เลือกเซ็ตเสื้อผ้าที่ถูกต้องตามเสียงที่ได้ยิน</div>
+        <div class="options-section" id="optionsGrid"></div>
 
-        <button class="primary-btn" id="checkBtn" onclick="checkPacking()">✅ จัดกระเป๋าเสร็จแล้ว!</button>
     </div>
 
     <!-- Login Modal -->
@@ -183,7 +143,7 @@
             <input type="text" id="in_name" placeholder="ชื่อ - นามสกุล">
             <input type="text" id="in_room" placeholder="ชั้น/ห้อง (เช่น 1/1)">
             <input type="text" id="in_id" placeholder="รหัสนักเรียน (5 หลัก)" maxlength="5">
-            <button class="primary-btn" onclick="confirmUser()">เริ่มจัดกระเป๋า</button>
+            <button class="primary-btn" style="display: block;" onclick="confirmUser()">เริ่มทำแบบทดสอบ</button>
         </div>
     </div>
 
@@ -193,42 +153,57 @@
             <h2 style="color:var(--dark); font-size: 24px; margin-top:0;">🎉 ยอดเยี่ยมมาก!</h2>
             <div style="font-size: 50px; font-weight: 900; color: var(--main); margin: 10px 0;"><span id="finalScore">0</span> / 4</div>
             <div id="saveStatus" style="font-weight:bold; color:#15803d; margin-bottom: 15px;"></div>
-            <button class="primary-btn" onclick="location.reload()">🔄 เล่นอีกครั้ง</button>
+            <button class="primary-btn" style="display: block;" onclick="location.reload()">🔄 เล่นอีกครั้ง</button>
         </div>
     </div>
 
     <script>
-        const TOPIC_NAME = "ม.1 Unit 6 Culture Turkey Listening";
+        const TOPIC_NAME = "ม.1 Unit 6 Culture Turkey Listening Quiz";
         
-        // โจทย์ 4 ข้อ (ใช้ข้อความ Wording ล้วนๆ)
+        // ข้อมูลโจทย์ 4 ข้อ พร้อมตัวเลือก 1 ถูก 3 หลอก
         const questions = [
             { 
                 audioFile: "Turkey_winter.mp3", 
-                req: ["long-sleeved shirt", "jeans", "warm hat", "gloves", "boots", "jacket", "woollen sweater", "winter coat"],
-                distractors: ["sunglasses", "swimsuit", "shorts", "flip-flops"] // หลอกด้วยของฤดูร้อน
+                correct: "long-sleeved shirt, jeans, warm hat, gloves, boots, jacket, woollen sweater, winter coat.",
+                distractors: [
+                    "short-sleeved shirt, shorts, sunglasses, flip-flops, walking shoes.",
+                    "swimsuit, towel, windsurf board, goggles, sandals.",
+                    "long-sleeved shirt, jeans, umbrella, raincoat, rubber boots."
+                ]
             },
             { 
                 audioFile: "Turkey_spring.mp3", 
-                req: ["short-sleeved shirt", "shorts", "walking shoes"],
-                distractors: ["winter coat", "gloves", "woollen sweater", "umbrella"] // หลอกด้วยชุดกันหนาว/ร่ม
+                correct: "short-sleeved shirt, shorts, walking shoes.",
+                distractors: [
+                    "winter coat, woollen sweater, warm hat, gloves, boots.",
+                    "swimsuit, sunglasses, windsurf board, flip-flops.",
+                    "long-sleeved shirt, jeans, scarf, thick jacket, umbrella."
+                ]
             },
             { 
                 audioFile: "Turkey_summer.mp3", 
-                req: ["short-sleeved shirt", "shorts", "walking shoes"],
-                distractors: ["winter coat", "scarf", "boots", "jacket", "umbrella"] // หลอกด้วยของหน้าหนาว/ฝน
+                correct: "short-sleeved shirt, shorts, walking shoes.",
+                distractors: [
+                    "winter coat, boots, thick jacket, warm hat, gloves.",
+                    "long-sleeved shirt, jeans, woollen sweater, scarf.",
+                    "snowboard, ski goggles, winter coat, thick boots."
+                ]
             },
             { 
                 audioFile: "Turkey_autumn.mp3", // ระวัง! หากใน Github ยังเป็น Turkey_autumn,.mp3 ให้ไปแก้ชื่อไฟล์นะครับ
-                req: ["long-sleeved shirt", "jeans", "boots", "jacket"],
-                distractors: ["sunglasses", "swimsuit", "shorts", "sandals"] 
+                correct: "long-sleeved shirt, jeans, boots, jacket.",
+                distractors: [
+                    "short-sleeved shirt, shorts, walking shoes, sunglasses.",
+                    "swimsuit, windsurf board, flip-flops, beach towel.",
+                    "short-sleeved shirt, jeans, umbrella, sandals, cap."
+                ]
             }
         ];
 
         let currentQuestionIdx = 0;
         let score = 0;
-        let packedItems = [];
         let currentAudio = null;
-        let currentAvailableClothes = [];
+        let currentOptions = [];
 
         window.onload = () => { 
             if(!localStorage.getItem('studentId')) document.getElementById('loginModal').classList.add('active');
@@ -273,7 +248,6 @@
         }
 
         function loadQuestion() {
-            packedItems = [];
             document.getElementById('progressIndicator').innerText = `ข้อที่ ${currentQuestionIdx + 1} / ${questions.length}`;
             
             if(currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; }
@@ -284,15 +258,15 @@
                 document.getElementById('listenText').innerText = "ฟังอีกครั้ง";
             };
 
+            // เตรียมตัวเลือก 4 ข้อ (ถูก 1 หลอก 3)
             let q = questions[currentQuestionIdx];
-            currentAvailableClothes = [...q.req, ...q.distractors];
-            currentAvailableClothes.sort(() => Math.random() - 0.5); // สุ่มตำแหน่งคำศัพท์
+            currentOptions = [q.correct, ...q.distractors];
+            currentOptions.sort(() => Math.random() - 0.5); // สุ่มตำแหน่ง ก ข ค ง
 
-            document.getElementById('suitcaseLabel').innerText = `🎒 กระเป๋าเดินทาง (ฟังเสียงเพื่อจัดของ)`;
-            document.getElementById('listenText').innerText = "กดฟังคำสั่งจัดกระเป๋า!";
+            document.getElementById('listenText').innerText = "กดฟังบทสนทนา";
             document.getElementById('listenBtn').classList.remove('playing');
             
-            renderClothes();
+            renderOptions();
         }
 
         function playQuestionAudio() {
@@ -306,57 +280,35 @@
                 currentAudio.pause();
                 currentAudio.currentTime = 0;
                 btn.classList.remove('playing');
-                document.getElementById('listenText').innerText = "กดฟังคำสั่งจัดกระเป๋า!";
+                document.getElementById('listenText').innerText = "กดฟังบทสนทนา";
             }
         }
 
-        function renderClothes() {
-            const wardrobe = document.getElementById('wardrobeGrid');
-            const suitcase = document.getElementById('suitcaseGrid');
-            wardrobe.innerHTML = ''; suitcase.innerHTML = '';
+        function renderOptions() {
+            const grid = document.getElementById('optionsGrid');
+            grid.innerHTML = '';
 
-            currentAvailableClothes.forEach(word => {
-                // สร้างป้ายในตู้เสื้อผ้า
-                let div = document.createElement('div');
-                div.className = `clothing-item ${packedItems.includes(word) ? 'in-suitcase' : ''}`;
-                div.innerText = word;
-                div.onclick = () => toggleItem(word);
-                wardrobe.appendChild(div);
-
-                // สร้างป้ายในกระเป๋า
-                if (packedItems.includes(word)) {
-                    let suitcaseItem = document.createElement('div');
-                    suitcaseItem.className = "suitcase-item";
-                    suitcaseItem.innerText = word;
-                    suitcaseItem.onclick = () => toggleItem(word); // กดเพื่อเอาออก
-                    suitcase.appendChild(suitcaseItem);
-                }
+            currentOptions.forEach((optionText, index) => {
+                let btn = document.createElement('button');
+                btn.className = "option-btn";
+                // ใส่ A B C D ข้างหน้าให้ดูง่าย
+                let prefix = String.fromCharCode(65 + index); 
+                btn.innerHTML = `<span style="color:var(--dark); font-weight:800; margin-right:8px;">${prefix}.</span> ${optionText}`;
+                btn.onclick = () => checkAnswer(optionText);
+                grid.appendChild(btn);
             });
+        }
+
+        function checkAnswer(selectedText) {
+            let q = questions[currentQuestionIdx];
             
-            document.getElementById('suitcaseLabel').innerText = `🎒 กระเป๋าเดินทาง (ใส่ไปแล้ว ${packedItems.length} ชิ้น)`;
-        }
-
-        function toggleItem(word) {
-            playPopSound();
-            if (packedItems.includes(word)) {
-                packedItems = packedItems.filter(i => i !== word);
-            } else {
-                packedItems.push(word);
-            }
-            renderClothes();
-        }
-
-        function checkPacking() {
-            let req = questions[currentQuestionIdx].req;
-            let isCorrect = req.length === packedItems.length && req.every(i => packedItems.includes(i));
-
-            if (isCorrect) {
+            if (selectedText === q.correct) {
                 score++;
                 playCorrectSound();
-                Swal.fire({ title: 'ถูกต้อง!', text: 'หูดีมาก! จัดกระเป๋าได้เป๊ะเวอร์', icon: 'success', timer: 1500, showConfirmButton: false }).then(nextQuestion);
+                Swal.fire({ title: 'ถูกต้อง!', text: 'เก่งมาก ฟังออกด้วย!', icon: 'success', timer: 1500, showConfirmButton: false }).then(nextQuestion);
             } else {
                 playWrongSound();
-                Swal.fire({ title: 'ยังไม่เป๊ะ!', text: 'ลองฟังเสียงดีๆ อีกรอบว่าเขาให้เอาอะไรไปบ้าง (ระวังคำหลอกนะ!)', icon: 'error', confirmButtonText: 'ลองใหม่' });
+                Swal.fire({ title: 'ผิดจ้า!', text: 'ตั้งใจฟังดีๆ นะ อันนั้นมันของฤดูอื่น!', icon: 'error', confirmButtonText: 'ลองฟังใหม่' });
             }
         }
 
@@ -380,7 +332,7 @@
             setTimeout(() => { stat.innerText = "✅ บันทึกคะแนนเรียบร้อย!"; }, 1500);
         }
 
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const audioCtx = new (window.AudioContext || window.window.webkitAudioContext)();
         function playBeep(freq, duration, type="sine") {
             if(audioCtx.state === 'suspended') audioCtx.resume();
             const osc = audioCtx.createOscillator();
@@ -392,7 +344,6 @@
             gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
             osc.stop(audioCtx.currentTime + duration);
         }
-        function playPopSound() { playBeep(400, 0.1); }
         function playCorrectSound() { playBeep(523.25, 0.1); setTimeout(() => playBeep(659.25, 0.2), 100); }
         function playWrongSound() { playBeep(250, 0.3, "sawtooth"); }
     </script>
