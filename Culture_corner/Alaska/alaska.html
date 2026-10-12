@@ -18,7 +18,7 @@
             min-height: 100vh;
         }
         
-        .container { max-width: 900px; margin: 0 auto; background: white; border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .container { max-width: 950px; margin: 0 auto; background: white; border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         .hidden { display: none !important; }
         
         h1 { font-family: 'Fredoka One', cursive; color: var(--main); text-align: center; font-size: 26px; margin: 5px 0 15px 0; }
@@ -71,10 +71,10 @@
         .suitcase-overlay-area {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            padding: 25px 20px;
+            padding: 20px;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
+            gap: 6px;
             align-content: start;
             overflow-y: auto;
         }
@@ -102,7 +102,7 @@
         }
         .wardrobe-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(65px, 1fr));
             gap: 10px;
         }
 
@@ -170,7 +170,7 @@
 
         <!-- ตู้เสื้อผ้า -->
         <div class="wardrobe-section">
-            <div style="font-weight: bold; color: #475569; margin-bottom: 8px;">👕 ตู้เสื้อผ้า (Wardrobe Items)</div>
+            <div style="font-weight: bold; color: #475569; margin-bottom: 8px;">👕 ตู้เสื้อผ้า (ครบทั้ง 11 ไอเทม)</div>
             <div class="wardrobe-grid" id="wardrobeGrid"></div>
         </div>
 
@@ -201,9 +201,12 @@
     <script>
         const TOPIC_NAME = "ม.1 Unit 6 Culture Alaska travel";
         
+        // รายการไอเทมครบทั้ง 11 ไฟล์ตาม GitHub
         const allClothes = [
             { id: "short_shirt", img: "short-sleeved_shirt.jpg" },
+            { id: "shorts", img: "shorts.jpg" },
             { id: "long_shirt", img: "long-sleeved_shirt.jpg" },
+            { id: "jeans", img: "jeans.jpg" },
             { id: "hat_gloves", img: "hat_gloves.jpg" },
             { id: "walking_shoes", img: "walking_shoes.jpg" },
             { id: "boots", img: "boots.jpg" },
@@ -212,11 +215,12 @@
             { id: "winter_coat", img: "winter_coat.jpg" }
         ];
 
+        // โจทย์แต่ละฤดู (อิงตามตารางหนังสือเรียน Alaska)
         const seasons = [
             { name: "Winter (ฤดูหนาว)", req: ["hat_gloves", "boots", "sweater", "winter_coat"] },
-            { name: "Spring (ฤดูใบไม้ผลิ)", req: ["long_shirt", "hat_gloves", "boots", "jacket", "sweater"] },
-            { name: "Summer (ฤดูร้อน)", req: ["short_shirt", "long_shirt", "walking_shoes", "jacket"] },
-            { name: "Autumn (ฤดูใบไม้ร่วง)", req: ["long_shirt", "hat_gloves", "walking_shoes", "boots", "jacket", "sweater"] }
+            { name: "Spring (ฤดูใบไม้ผลิ)", req: ["long_shirt", "jeans", "hat_gloves", "boots", "sweater"] },
+            { name: "Summer (ฤดูร้อน)", req: ["short_shirt", "shorts", "long_shirt", "jeans", "walking_shoes", "jacket"] },
+            { name: "Autumn (ฤดูใบไม้ร่วง)", req: ["long_shirt", "jeans", "hat_gloves", "walking_shoes", "boots", "jacket", "sweater"] }
         ];
 
         let currentSeasonIdx = 0;
@@ -229,10 +233,8 @@
             else { checkLogin(); startGame(); }
         };
 
-        // --- Dialog Toggle ---
         function toggleDialog() {
-            const box = document.getElementById('infoDialog');
-            box.classList.toggle('hidden');
+            document.getElementById('infoDialog').classList.toggle('hidden');
         }
 
         // --- Auth & Auto Room ---
@@ -292,11 +294,10 @@
                 div.onclick = () => toggleItem(item.id);
                 wardrobe.appendChild(div);
 
-                // หากอยู่ในกระเป๋า ให้สร้างตัวโคลนไปแสดงในกระเป๋าเดินทางด้านบน
                 if (packedItems.includes(item.id)) {
                     let suitcaseItem = div.cloneNode(true);
                     suitcaseItem.className = "clothing-item";
-                    suitcaseItem.onclick = () => toggleItem(item.id); // กดเพื่อเอาออก
+                    suitcaseItem.onclick = () => toggleItem(item.id);
                     suitcase.appendChild(suitcaseItem);
                 }
             });
