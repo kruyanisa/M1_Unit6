@@ -133,6 +133,19 @@
             document.getElementById('loginModal').classList.add('active');
         }
 
+        // วางโค้ด Auto ชั้นเรียนไว้ตรงนี้ได้เลย
+        document.getElementById('in_room').addEventListener('blur', function() {
+            let val = this.value.trim();
+            val = val.replace(/ม\.?/g, '').trim(); 
+            let nums = val.match(/\d+/g);
+            
+            if (nums && nums.length >= 2) {
+                this.value = `ม.${nums[0]}/${nums[1]}`;
+            } else if (nums && nums.length === 1) {
+                this.value = `ม.1/${nums[0]}`;
+            }
+        });
+        
         function confirmUser() {
             let n = document.getElementById('in_name').value.trim();
             let r = document.getElementById('in_room').value.trim();
