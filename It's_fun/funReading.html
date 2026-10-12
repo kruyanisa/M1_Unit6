@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -22,18 +21,71 @@
         .profile-bar { font-size: 14px; background: #e0f2fe; border: 2px solid #bae6fd; padding: 8px 15px; border-radius: 20px; color: var(--dark); font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px; }
         .btn-switch { background: #fca5a5; color: white; border: none; padding: 4px 12px; border-radius: 12px; cursor: pointer; font-family: 'Sarabun'; font-weight: bold; }
         
-        /* Postcard */
-        .postcard { background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 10px; padding: 20px; margin-bottom: 15px; position: relative; font-size: 15px; line-height: 1.6; }
-        .stamp-box { position: absolute; top: 15px; right: 15px; width: 60px; height: 75px; border: 2px solid #fff; outline: 2px dashed #94a3b8; outline-offset: -2px; background: #f1f5f9; }
-        .stamp-box img { width: 100%; height: 100%; object-fit: cover; }
+        /* Realistic Postcard Scene */
+        .postcard-wrapper {
+            background: #fdfbf7;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 25px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        @media (min-width: 600px) {
+            .postcard-wrapper { flex-direction: row; }
+        }
+        .postcard-content {
+            flex: 1.5;
+            font-family: 'Sarabun', sans-serif;
+            font-size: 16px;
+            line-height: 1.7;
+            color: #1e293b;
+        }
+        .postcard-divider {
+            width: 100%; height: 2px;
+            background: #cbd5e1;
+            margin: 20px 0;
+        }
+        @media (min-width: 600px) {
+            .postcard-divider { width: 2px; height: auto; margin: 0 25px; }
+        }
+        .postcard-address {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            position: relative;
+            padding-top: 60px; /* Space for stamp */
+        }
+        .stamp-container {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 75px;
+            height: 90px;
+            background: white;
+            padding: 4px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+            transform: rotate(4deg);
+        }
+        .stamp-container img { width: 100%; height: 100%; object-fit: cover; border: 1px dashed #cbd5e1; }
+        .address-line {
+            border-bottom: 1px solid #94a3b8;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            font-size: 15px;
+            color: #334155;
+        }
         
         /* Audio Button */
         .audio-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; max-width: 300px; margin: 0 auto 25px auto; background: #fbbf24; color: #b45309; font-weight: bold; padding: 10px; border-radius: 20px; cursor: pointer; border: none; font-family: 'Sarabun'; font-size: 16px; box-shadow: 0 4px 0 #d97706; transition: 0.1s; }
         .audio-btn:active { transform: translateY(4px); box-shadow: none; }
         
         /* Word Bank */
-        .word-bank { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 20px; min-height: 40px; }
-        .word-chip { background: white; border: 2px solid #7dd3fc; padding: 6px 15px; border-radius: 20px; font-weight: bold; color: var(--dark); cursor: pointer; transition: 0.2s; font-size: 15px; box-shadow: 0 3px 0 #bae6fd; user-select: none; }
+        .word-bank { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 20px; min-height: 40px; }
+        .word-chip { background: white; border: 2px solid #7dd3fc; padding: 8px 20px; border-radius: 20px; font-weight: bold; color: var(--dark); cursor: pointer; transition: 0.2s; font-size: 16px; box-shadow: 0 3px 0 #bae6fd; user-select: none; }
         .word-chip:active { transform: translateY(3px); box-shadow: none; }
         .word-chip.selected { background: var(--main); color: white; border-color: var(--dark); box-shadow: 0 3px 0 var(--dark); transform: scale(1.05); }
         .word-chip.used { opacity: 0.3; pointer-events: none; box-shadow: none; transform: translateY(3px); }
@@ -71,32 +123,40 @@
     <div class="container">
         <h1>It's fun! Reading Sandra</h1>
         
-        <div class="postcard">
-            <div class="stamp-box">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/1896_Greece_Olympics_2l_stamp.jpg/120px-1896_Greece_Olympics_2l_stamp.jpg" alt="stamp" onerror="this.style.display='none'">
+        <div class="postcard-wrapper">
+            <div class="postcard-content">
+                Dear Grandma and Grandpa,<br>
+                Greetings from Greece. We're having a great time here. The hotel's fantastic. We're staying on the second floor. The weather's lovely. It's hot and sunny. Dad's windsurfing at the moment. Tony's playing golf with Steve. They're enjoying it a lot. I'm on the beach now. Mum is swimming and I'm sunbathing.<br>
+                It's lots of fun. See you soon.<br>
+                Sandra
             </div>
-            <p>Dear Grandma and Grandpa,<br>
-            Greetings from Greece. We're having a great time here. The hotel's fantastic. We're staying on the second floor. The weather's lovely. It's hot and sunny. Dad's windsurfing at the moment. Tony's playing golf with Steve. They're enjoying it a lot. I'm on the beach now. Mum is swimming and I'm sunbathing.<br>
-            It's lots of fun. See you soon.<br>
-            Sandra</p>
+            
+            <div class="postcard-divider"></div>
+            
+            <div class="postcard-address">
+                <div class="stamp-container">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/1896_Greece_Olympics_2l_stamp.jpg/120px-1896_Greece_Olympics_2l_stamp.jpg" alt="stamp" onerror="this.style.display='none'">
+                </div>
+                <div class="address-line">Mr and Mrs S Murphy</div>
+                <div class="address-line">22 Farlan Road</div>
+                <div class="address-line">Dublin 2</div>
+                <div class="address-line">Ireland</div>
+            </div>
         </div>
 
         <button class="audio-btn" onclick="playAudio()">
             <span>🔊</span> <span id="audioText">กดฟังเสียงจดหมาย</span>
         </button>
 
-        <div style="text-align: center; font-weight: bold; color: #64748b; margin-bottom: 15px;">
-            👇 แตะคำศัพท์ แล้วแตะช่องว่างใต้ภาพให้ตรงกัน
+        <div style="text-align: center; font-weight: bold; color: #64748b; margin-bottom: 15px; font-size: 16px;">
+            👇 แตะชื่อคน แล้วนำไปเติมใต้รูปกิจกรรมที่ตรงกันให้ครบทั้ง 4 คน
         </div>
 
         <div class="word-bank" id="wordBank">
-            <div class="word-chip" data-word="fish" onclick="selectWord(this)">fish</div>
-            <div class="word-chip" data-word="windsurf" onclick="selectWord(this)">windsurf</div>
-            <div class="word-chip" data-word="ski" onclick="selectWord(this)">ski</div>
-            <div class="word-chip" data-word="play golf" onclick="selectWord(this)">play golf</div>
-            <div class="word-chip" data-word="sunbathe" onclick="selectWord(this)">sunbathe</div>
-            <div class="word-chip" data-word="swim" onclick="selectWord(this)">swim</div>
-            <div class="word-chip" data-word="read a book" onclick="selectWord(this)">read a book</div>
+            <div class="word-chip" data-word="Dad" onclick="selectWord(this)">Dad</div>
+            <div class="word-chip" data-word="Tony" onclick="selectWord(this)">Tony</div>
+            <div class="word-chip" data-word="Sandra" onclick="selectWord(this)">Sandra</div>
+            <div class="word-chip" data-word="Mum" onclick="selectWord(this)">Mum</div>
         </div>
 
         <div class="image-grid">
@@ -128,7 +188,7 @@
     <div class="modal-overlay" id="scoreModal">
         <div class="modal-box">
             <h2 style="color:var(--dark); font-size: 24px; margin-top:0;">🎉 ทำเสร็จแล้ว!</h2>
-            <div style="font-size: 50px; font-weight: 900; color: var(--main); margin: 10px 0;"><span id="finalScore">0</span> / 7</div>
+            <div style="font-size: 50px; font-weight: 900; color: var(--main); margin: 10px 0;"><span id="finalScore">0</span> / 4</div>
             <div id="saveStatus" style="font-weight:bold; color:#15803d; margin-bottom: 15px;"></div>
             <button class="primary-btn" onclick="closeScore()">ดูเฉลย</button>
         </div>
@@ -136,7 +196,8 @@
 
     <script>
         const TOPIC_NAME = "ม.1 Unit 6 It's fun! Reading Sandra";
-        const answers = { q1: "fish", q2: "windsurf", q3: "ski", q4: "play golf", q5: "sunbathe", q6: "swim", q7: "read a book" };
+        // เฉลยมีเฉพาะรูปที่เป็นตัวละครในจดหมาย
+        const answers = { q2: "Dad", q4: "Tony", q5: "Sandra", q6: "Mum" };
         
         let score = 0;
         let isWaitingSubmit = false;
@@ -227,23 +288,27 @@
 
         // --- Grading System ---
         function gradeQuiz() {
-            let allAnswered = true;
+            // เช็คว่านำคำมาเติมครบ 4 คนหรือยัง
+            let placedCount = document.querySelectorAll('.word-chip.used').length;
+            if(placedCount < 4) { Swal.fire('เตือน', 'กรุณาเติมชื่อคนใต้ภาพให้ครบทั้ง 4 คน', 'warning'); return; }
+
             score = 0;
 
             for (let i = 1; i <= 7; i++) {
                 let q = document.getElementById(`q${i}`);
-                if (!q.dataset.val) { allAnswered = false; }
-            }
+                let val = q.dataset.val;
 
-            if(!allAnswered) { Swal.fire('เตือน', 'กรุณาเติมคำให้ครบทุกภาพ', 'warning'); return; }
-
-            for (let i = 1; i <= 7; i++) {
-                let q = document.getElementById(`q${i}`);
-                if (q.dataset.val === answers[`q${i}`]) { 
-                    q.classList.add('correct'); 
-                    score++; 
-                } else { 
-                    q.classList.add('wrong'); 
+                if (val) {
+                    if (answers[`q${i}`] === val) { 
+                        q.classList.add('correct'); 
+                        score++; 
+                    } else { 
+                        q.classList.add('wrong'); 
+                    }
+                }
+                
+                // เฉลยให้ดูเฉพาะรูปที่มีคำตอบที่ถูก
+                if (answers[`q${i}`] && answers[`q${i}`] !== val) {
                     document.getElementById(`ans${i}`).innerText = `เฉลย: ${answers[`q${i}`]}`;
                 }
             }
@@ -269,7 +334,7 @@
             stat.innerText = "⏳ กำลังส่งคะแนน...";
             fetch(QUIZ_CONFIG.SCRIPT_URL, { 
                 method: 'POST', mode: 'no-cors', 
-                body: JSON.stringify({ name: localStorage.getItem('studentName'), room: localStorage.getItem('studentRoom'), studentId: "'"+localStorage.getItem('studentId'), lesson: TOPIC_NAME, score: score, maxScore: 7 }) 
+                body: JSON.stringify({ name: localStorage.getItem('studentName'), room: localStorage.getItem('studentRoom'), studentId: "'"+localStorage.getItem('studentId'), lesson: TOPIC_NAME, score: score, maxScore: 4 }) 
             }).catch(e=>{});
 
             setTimeout(() => { stat.innerText = "✅ บันทึกคะแนนเรียบร้อย!"; }, 1500);
