@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -15,17 +14,14 @@
         body { 
             font-family: 'Sarabun', sans-serif; 
             margin: 0; padding: 15px; 
-            background: url('bg_alaska.jpg') no-repeat center center fixed;
-            background-size: cover;
+            background: #f0f9ff;
             min-height: 100vh;
         }
-        /* Overlay เพื่อให้ข้อความอ่านง่ายขึ้น */
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.7); z-index: -1; }
         
-        .container { max-width: 700px; margin: 0 auto; background: rgba(255,255,255,0.95); border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .container { max-width: 900px; margin: 0 auto; background: white; border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         .hidden { display: none !important; }
         
-        h1 { font-family: 'Fredoka One', cursive; color: var(--main); text-align: center; font-size: 26px; margin: 5px 0 15px 0; text-shadow: 1px 1px 0px white; }
+        h1 { font-family: 'Fredoka One', cursive; color: var(--main); text-align: center; font-size: 26px; margin: 5px 0 15px 0; }
         
         .profile-bar { font-size: 14px; background: #e0f2fe; border: 2px solid #bae6fd; padding: 8px 15px; border-radius: 20px; color: var(--dark); font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 15px; }
         .btn-switch { background: #fca5a5; color: white; border: none; padding: 4px 12px; border-radius: 12px; cursor: pointer; font-family: 'Sarabun'; font-weight: bold; }
@@ -35,47 +31,93 @@
 
         .season-title { text-align: center; font-size: 22px; font-weight: 800; color: #1e293b; background: #fef08a; padding: 10px; border-radius: 12px; border: 2px dashed #ca8a04; margin-bottom: 20px; }
         
-        /* กระเป๋าเดินทาง (ใช้เป็นพื้นหลัง 16:9) */
-        .suitcase-area {
-            background: url('suitcase.jpg') no-repeat center center;
-            background-size: cover;
-            border-radius: 12px;
-            min-height: 200px;
-            padding: 15px;
-            margin-bottom: 20px;
-            border: 4px solid #854d0e;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        /* Layout ซ้าย-ขวา 16:9 Display */
+        .display-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-            gap: 10px;
-            align-content: start;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        @media (min-width: 768px) {
+            .display-grid { grid-template-columns: 1fr 1fr; }
         }
 
-        /* ตู้เสื้อผ้า */
-        .wardrobe-area {
+        .visual-card {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 3px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: relative;
+            background: #000;
+        }
+        .visual-card img {
+            width: 100%;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+            display: block;
+        }
+        .card-label {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%;
+            background: rgba(15, 23, 42, 0.75);
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 6px 10px;
+            text-align: center;
+        }
+
+        /* กระเป๋าเดินทาง (โซนหยิบของใส่) */
+        .suitcase-overlay-area {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            padding: 25px 20px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            align-content: start;
+            overflow-y: auto;
+        }
+
+        /* Dialog ควบคุมด้านใต้ */
+        .dialog-container {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .dialog-toggle-btn {
+            background: #e0f2fe; color: var(--dark); border: 2px solid #bae6fd; font-weight: bold; padding: 8px 20px; border-radius: 20px; cursor: pointer; font-family: 'Sarabun'; font-size: 15px; transition: 0.2s;
+        }
+        .dialog-toggle-btn:hover { background: #bae6fd; }
+        .dialog-box {
+            background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 12px; padding: 15px; margin-top: 10px; text-align: left; font-size: 15px; color: #334155; line-height: 1.6; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* ตู้เสื้อผ้าด้านล่าง */
+        .wardrobe-section {
             background: #f8fafc;
             border: 2px dashed #cbd5e1;
             border-radius: 12px;
             padding: 15px;
-            min-height: 120px;
+            margin-bottom: 20px;
+        }
+        .wardrobe-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
             gap: 10px;
-            margin-bottom: 20px;
         }
 
         .clothing-item {
             width: 100%; aspect-ratio: 1/1; 
             background: white; border-radius: 8px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+            box-shadow: 0 3px 5px rgba(0,0,0,0.1); 
             cursor: pointer; transition: 0.2s;
-            border: 2px solid transparent;
+            border: 2px solid #cbd5e1;
             overflow: hidden;
             display: flex; align-items: center; justify-content: center;
         }
         .clothing-item img { width: 90%; height: 90%; object-fit: contain; }
         .clothing-item:active { transform: scale(0.9); }
-        .clothing-item.in-suitcase { border-color: #22c55e; }
+        .clothing-item.in-suitcase { opacity: 0.3; transform: scale(0.85); pointer-events: none; }
 
         .primary-btn { width: 100%; background: var(--main); color: white; font-weight: 800; font-size: 18px; padding: 15px; border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 0 var(--dark); margin-top: 10px; transition: 0.1s; }
         .primary-btn:active { transform: translateY(4px); box-shadow: none; }
@@ -88,7 +130,6 @@
     </style>
 </head>
 <body>
-    <div class="overlay"></div>
     
     <div id="userProfile" class="profile-bar hidden">
         <span>👤 <span id="p_name"></span> | 🏫 <span id="p_room"></span> | 🆔 <span id="p_id"></span></span>
@@ -104,11 +145,34 @@
 
         <div class="season-title" id="seasonDisplay">ฤดูกาล...</div>
 
-        <div style="font-weight: bold; color: #475569; margin-bottom: 5px;">🎒 Your Suitcase (แตะเสื้อผ้าเพื่อหยิบเข้า/ออก)</div>
-        <div class="suitcase-area" id="suitcaseGrid"></div>
+        <!-- Layout 16:9 ซ้าย BG / ขวา Suitcase -->
+        <div class="display-grid">
+            <div class="visual-card">
+                <img src="bg_alaska.jpg" alt="Alaska Landscape" onerror="this.src='https://via.placeholder.com/600x337?text=Alaska+BG'">
+                <div class="card-label">🏔️ บรรยากาศดินแดน Alaska</div>
+            </div>
+            
+            <div class="visual-card" style="position: relative;">
+                <img src="suitcase.jpg" alt="Suitcase" onerror="this.src='https://via.placeholder.com/600x337?text=Suitcase'">
+                <div class="suitcase-overlay-area" id="suitcaseGrid"></div>
+                <div class="card-label">🎒 กระเป๋าเดินทาง (แตะเสื้อผ้าในตู้เพื่อเก็บเข้ากระเป๋า)</div>
+            </div>
+        </div>
 
-        <div style="font-weight: bold; color: #475569; margin-bottom: 5px;">👕 Wardrobe</div>
-        <div class="wardrobe-area" id="wardrobeGrid"></div>
+        <!-- Dialog เปิด-ปิดคำแนะนำบทความ -->
+        <div class="dialog-container">
+            <button class="dialog-toggle-btn" onclick="toggleDialog()">📖 เปิด/ปิด ข้อมูลและคำแนะนำบทความ</button>
+            <div class="dialog-box hidden" id="infoDialog">
+                <b>📌 Alaska Context:</b><br>
+                Alaska is in the north-west corner of North America. Temperatures vary from 16°C to 27°C in summer, and winters are cold with lots of snow. Make sure you pack the right clothes for each season!
+            </div>
+        </div>
+
+        <!-- ตู้เสื้อผ้า -->
+        <div class="wardrobe-section">
+            <div style="font-weight: bold; color: #475569; margin-bottom: 8px;">👕 ตู้เสื้อผ้า (Wardrobe Items)</div>
+            <div class="wardrobe-grid" id="wardrobeGrid"></div>
+        </div>
 
         <button class="primary-btn" id="checkBtn" onclick="checkPacking()">✅ จัดกระเป๋าเสร็จแล้ว!</button>
     </div>
@@ -137,7 +201,6 @@
     <script>
         const TOPIC_NAME = "ม.1 Unit 6 Culture Alaska travel";
         
-        // ข้อมูลเสื้อผ้าและไฟล์ภาพ 1:1 .jpg
         const allClothes = [
             { id: "short_shirt", img: "short-sleeved_shirt.jpg" },
             { id: "long_shirt", img: "long-sleeved_shirt.jpg" },
@@ -149,7 +212,6 @@
             { id: "winter_coat", img: "winter_coat.jpg" }
         ];
 
-        // โจทย์แต่ละฤดู (อิงตามตาราง)
         const seasons = [
             { name: "Winter (ฤดูหนาว)", req: ["hat_gloves", "boots", "sweater", "winter_coat"] },
             { name: "Spring (ฤดูใบไม้ผลิ)", req: ["long_shirt", "hat_gloves", "boots", "jacket", "sweater"] },
@@ -166,6 +228,12 @@
             if(!localStorage.getItem('studentId')) document.getElementById('loginModal').classList.add('active');
             else { checkLogin(); startGame(); }
         };
+
+        // --- Dialog Toggle ---
+        function toggleDialog() {
+            const box = document.getElementById('infoDialog');
+            box.classList.toggle('hidden');
+        }
 
         // --- Auth & Auto Room ---
         document.getElementById('in_room').addEventListener('blur', function() {
@@ -200,7 +268,6 @@
 
         // --- Game Logic ---
         function startGame() {
-            // สุ่มลำดับฤดู
             seasons.sort(() => Math.random() - 0.5);
             currentSeasonIdx = 0;
             score = 0;
@@ -221,27 +288,32 @@
             allClothes.forEach(item => {
                 let div = document.createElement('div');
                 div.className = `clothing-item ${packedItems.includes(item.id) ? 'in-suitcase' : ''}`;
-                div.innerHTML = `<img src="${item.img}" alt="clothes" onerror="this.src='https://via.placeholder.com/150?text=No+Image'">`;
+                div.innerHTML = `<img src="${item.img}" alt="clothes" onerror="this.src='https://via.placeholder.com/150?text=Item'">`;
                 div.onclick = () => toggleItem(item.id);
-                
-                if (packedItems.includes(item.id)) suitcase.appendChild(div);
-                else wardrobe.appendChild(div);
+                wardrobe.appendChild(div);
+
+                // หากอยู่ในกระเป๋า ให้สร้างตัวโคลนไปแสดงในกระเป๋าเดินทางด้านบน
+                if (packedItems.includes(item.id)) {
+                    let suitcaseItem = div.cloneNode(true);
+                    suitcaseItem.className = "clothing-item";
+                    suitcaseItem.onclick = () => toggleItem(item.id); // กดเพื่อเอาออก
+                    suitcase.appendChild(suitcaseItem);
+                }
             });
         }
 
         function toggleItem(id) {
             playPopSound();
             if (packedItems.includes(id)) {
-                packedItems = packedItems.filter(i => i !== id); // เอาออก
+                packedItems = packedItems.filter(i => i !== id);
             } else {
-                packedItems.push(id); // หยิบใส่
+                packedItems.push(id);
             }
             renderClothes();
         }
 
         function checkPacking() {
             let req = seasons[currentSeasonIdx].req;
-            // เช็คว่าจัดของถูกเป๊ะไหม (จำนวนเท่ากันและของตรงกัน)
             let isCorrect = req.length === packedItems.length && req.every(i => packedItems.includes(i));
 
             if (isCorrect) {
@@ -250,7 +322,7 @@
                 Swal.fire({ title: 'ถูกต้อง!', text: 'จัดกระเป๋าได้เยี่ยมมาก', icon: 'success', timer: 1500, showConfirmButton: false }).then(nextSeason);
             } else {
                 playWrongSound();
-                Swal.fire({ title: 'ยังไม่เป๊ะ!', text: 'ลองดูตารางอีกทีว่าฤดูนี้ต้องเตรียมอะไรบ้างนะ', icon: 'error', confirmButtonText: 'จัดใหม่' });
+                Swal.fire({ title: 'ยังไม่เป๊ะ!', text: 'ลองตรวจสอบตารางเสื้อผ้าของ Alaska อีกครั้งนะ', icon: 'error', confirmButtonText: 'จัดใหม่' });
             }
         }
 
