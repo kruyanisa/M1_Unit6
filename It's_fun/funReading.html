@@ -1,1 +1,301 @@
 
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>It's fun! Reading Sandra</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Sarabun:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://kruyanisa.github.io/classroom-core/quiz-config.js"></script>
+    
+    <style>
+        :root { --main: #0ea5e9; --dark: #0284c7; --bg: #f0f9ff; }
+        body { font-family: 'Sarabun', sans-serif; background-color: var(--bg); color: #334155; margin: 0; padding: 15px; }
+        h1 { font-family: 'Fredoka One', cursive; color: var(--main); text-align: center; font-size: 26px; margin-bottom: 5px; }
+        
+        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .hidden { display: none !important; }
+        
+        /* Profile Bar */
+        .profile-bar { font-size: 14px; background: #e0f2fe; border: 2px solid #bae6fd; padding: 8px 15px; border-radius: 20px; color: var(--dark); font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px; }
+        .btn-switch { background: #fca5a5; color: white; border: none; padding: 4px 12px; border-radius: 12px; cursor: pointer; font-family: 'Sarabun'; font-weight: bold; }
+        
+        /* Postcard */
+        .postcard { background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 10px; padding: 20px; margin-bottom: 15px; position: relative; font-size: 15px; line-height: 1.6; }
+        .stamp-box { position: absolute; top: 15px; right: 15px; width: 60px; height: 75px; border: 2px solid #fff; outline: 2px dashed #94a3b8; outline-offset: -2px; background: #f1f5f9; }
+        .stamp-box img { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* Audio Button */
+        .audio-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; max-width: 300px; margin: 0 auto 25px auto; background: #fbbf24; color: #b45309; font-weight: bold; padding: 10px; border-radius: 20px; cursor: pointer; border: none; font-family: 'Sarabun'; font-size: 16px; box-shadow: 0 4px 0 #d97706; transition: 0.1s; }
+        .audio-btn:active { transform: translateY(4px); box-shadow: none; }
+        
+        /* Word Bank */
+        .word-bank { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 20px; min-height: 40px; }
+        .word-chip { background: white; border: 2px solid #7dd3fc; padding: 6px 15px; border-radius: 20px; font-weight: bold; color: var(--dark); cursor: pointer; transition: 0.2s; font-size: 15px; box-shadow: 0 3px 0 #bae6fd; user-select: none; }
+        .word-chip:active { transform: translateY(3px); box-shadow: none; }
+        .word-chip.selected { background: var(--main); color: white; border-color: var(--dark); box-shadow: 0 3px 0 var(--dark); transform: scale(1.05); }
+        .word-chip.used { opacity: 0.3; pointer-events: none; box-shadow: none; transform: translateY(3px); }
+
+        /* Image Grid */
+        .image-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .img-card { background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px; padding: 10px; text-align: center; }
+        .img-card img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 8px; margin-bottom: 10px; border: 1px solid #cbd5e1; }
+        
+        /* Drop Zone */
+        .drop-zone { height: 35px; border: 2px dashed #94a3b8; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--main); font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 15px; background: white; }
+        .drop-zone.filled { border: 2px solid var(--main); background: #f0f9ff; }
+        .drop-zone.correct { border-color: #22c55e; color: #15803d; background: #dcfce7; pointer-events: none; }
+        .drop-zone.wrong { border-color: #ef4444; color: #b91c1c; background: #fee2e2; pointer-events: none; }
+        
+        .ans-label { display: block; font-size: 13px; color: #15803d; font-weight: bold; margin-top: 5px; }
+
+        .primary-btn { width: 100%; background: var(--main); color: white; font-weight: 800; font-size: 18px; padding: 15px; border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 0 var(--dark); margin-top: 10px; transition: 0.1s; }
+        .primary-btn:active { transform: translateY(4px); box-shadow: none; }
+
+        /* Modals */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(240,249,255,0.85); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 2000; visibility: hidden; opacity: 0; transition: 0.3s; padding: 15px; box-sizing: border-box; }
+        .modal-overlay.active { visibility: visible; opacity: 1; }
+        .modal-box { background: white; padding: 30px 20px; border-radius: 20px; text-align: center; width: 100%; max-width: 320px; border: 4px solid var(--main); box-shadow: 0 10px 25px rgba(14,165,233,0.2); }
+        .modal-box input { width: 100%; padding: 10px; margin-bottom: 12px; border: 2px solid #7dd3fc; border-radius: 10px; text-align: center; font-family: 'Sarabun'; font-size: 16px; outline: none; }
+    </style>
+</head>
+<body>
+
+    <div id="userProfile" class="profile-bar hidden">
+        <span>👤 <span id="p_name"></span> | 🏫 <span id="p_room"></span> | 🆔 <span id="p_id"></span></span>
+        <button class="btn-switch" onclick="switchAccount()">🔄 สลับ</button>
+    </div>
+
+    <div class="container">
+        <h1>It's fun! Reading Sandra</h1>
+        
+        <div class="postcard">
+            <div class="stamp-box">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/1896_Greece_Olympics_2l_stamp.jpg/120px-1896_Greece_Olympics_2l_stamp.jpg" alt="stamp" onerror="this.style.display='none'">
+            </div>
+            <p>Dear Grandma and Grandpa,<br>
+            Greetings from Greece. We're having a great time here. The hotel's fantastic. We're staying on the second floor. The weather's lovely. It's hot and sunny. Dad's windsurfing at the moment. Tony's playing golf with Steve. They're enjoying it a lot. I'm on the beach now. Mum is swimming and I'm sunbathing.<br>
+            It's lots of fun. See you soon.<br>
+            Sandra</p>
+        </div>
+
+        <button class="audio-btn" onclick="playAudio()">
+            <span>🔊</span> <span id="audioText">กดฟังเสียงจดหมาย</span>
+        </button>
+
+        <div style="text-align: center; font-weight: bold; color: #64748b; margin-bottom: 15px;">
+            👇 แตะคำศัพท์ แล้วแตะช่องว่างใต้ภาพให้ตรงกัน
+        </div>
+
+        <div class="word-bank" id="wordBank">
+            <div class="word-chip" data-word="fish" onclick="selectWord(this)">fish</div>
+            <div class="word-chip" data-word="windsurf" onclick="selectWord(this)">windsurf</div>
+            <div class="word-chip" data-word="ski" onclick="selectWord(this)">ski</div>
+            <div class="word-chip" data-word="play golf" onclick="selectWord(this)">play golf</div>
+            <div class="word-chip" data-word="sunbathe" onclick="selectWord(this)">sunbathe</div>
+            <div class="word-chip" data-word="swim" onclick="selectWord(this)">swim</div>
+            <div class="word-chip" data-word="read a book" onclick="selectWord(this)">read a book</div>
+        </div>
+
+        <div class="image-grid">
+            <div class="img-card"><img src="./a_fishing.jpg" alt="fishing"><div class="drop-zone" id="q1" data-val="" onclick="placeWord(this)"></div><div id="ans1" class="ans-label"></div></div>
+            <div class="img-card"><img src="./b_windsurf.jpg" alt="windsurf"><div class="drop-zone" id="q2" data-val="" onclick="placeWord(this)"></div><div id="ans2" class="ans-label"></div></div>
+            <div class="img-card"><img src="./c_skiing.jpg" alt="skiing"><div class="drop-zone" id="q3" data-val="" onclick="placeWord(this)"></div><div id="ans3" class="ans-label"></div></div>
+            <div class="img-card"><img src="./d_play_golf.jpg" alt="play golf"><div class="drop-zone" id="q4" data-val="" onclick="placeWord(this)"></div><div id="ans4" class="ans-label"></div></div>
+            <div class="img-card"><img src="./e_sunbathe.jpg" alt="sunbathe"><div class="drop-zone" id="q5" data-val="" onclick="placeWord(this)"></div><div id="ans5" class="ans-label"></div></div>
+            <div class="img-card"><img src="./f_swimming.jpg" alt="swimming"><div class="drop-zone" id="q6" data-val="" onclick="placeWord(this)"></div><div id="ans6" class="ans-label"></div></div>
+            <div class="img-card"><img src="./g_reading.jpg" alt="reading"><div class="drop-zone" id="q7" data-val="" onclick="placeWord(this)"></div><div id="ans7" class="ans-label"></div></div>
+        </div>
+
+        <button class="primary-btn" id="submitBtn" onclick="gradeQuiz()">✅ ส่งคำตอบ</button>
+        <button class="primary-btn hidden" id="resetBtn" style="background: #fbbf24; color: #b45309; box-shadow: 0 4px 0 #d97706;" onclick="resetQuiz()">🔄 ทำใหม่อีกครั้ง</button>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal-box">
+            <h2 style="color:var(--dark); font-size: 22px; margin-top:0;">📝 ลงชื่อเข้าเรียน</h2>
+            <input type="text" id="in_name" placeholder="ชื่อ - นามสกุล">
+            <input type="text" id="in_room" placeholder="ชั้น/ห้อง (เช่น 1/1)">
+            <input type="text" id="in_id" placeholder="รหัสนักเรียน (5 หลัก)" maxlength="5">
+            <button class="primary-btn" onclick="confirmUser()">บันทึกข้อมูล</button>
+        </div>
+    </div>
+
+    <!-- Score Modal -->
+    <div class="modal-overlay" id="scoreModal">
+        <div class="modal-box">
+            <h2 style="color:var(--dark); font-size: 24px; margin-top:0;">🎉 ทำเสร็จแล้ว!</h2>
+            <div style="font-size: 50px; font-weight: 900; color: var(--main); margin: 10px 0;"><span id="finalScore">0</span> / 7</div>
+            <div id="saveStatus" style="font-weight:bold; color:#15803d; margin-bottom: 15px;"></div>
+            <button class="primary-btn" onclick="closeScore()">ดูเฉลย</button>
+        </div>
+    </div>
+
+    <script>
+        const TOPIC_NAME = "ม.1 Unit 6 It's fun! Reading Sandra";
+        const answers = { q1: "fish", q2: "windsurf", q3: "ski", q4: "play golf", q5: "sunbathe", q6: "swim", q7: "read a book" };
+        
+        let score = 0;
+        let isWaitingSubmit = false;
+        let activeWordChip = null;
+        let audio = new Audio('./Sandra.mp3');
+
+        window.onload = () => { checkLogin(); };
+
+        // --- Audio System ---
+        function playAudio() {
+            if (audio.paused) {
+                audio.play();
+                document.getElementById('audioText').innerText = "กำลังเล่นเสียง...";
+            } else {
+                audio.pause();
+                document.getElementById('audioText').innerText = "กดฟังเสียงจดหมาย";
+            }
+        }
+        audio.onended = () => { document.getElementById('audioText').innerText = "กดฟังเสียงจดหมาย"; };
+
+        // --- Tap & Drop System ---
+        function selectWord(chipElement) {
+            if (chipElement.classList.contains('used')) return;
+            document.querySelectorAll('.word-chip').forEach(el => el.classList.remove('selected'));
+            activeWordChip = chipElement;
+            chipElement.classList.add('selected');
+        }
+
+        function placeWord(zoneElement) {
+            if (zoneElement.dataset.val !== "") {
+                let existingWord = zoneElement.dataset.val;
+                let originalChip = document.querySelector(`.word-chip[data-word="${existingWord}"]`);
+                if (originalChip) originalChip.classList.remove('used');
+                
+                zoneElement.innerText = "";
+                zoneElement.dataset.val = "";
+                zoneElement.classList.remove('filled');
+            }
+
+            if (activeWordChip) {
+                let word = activeWordChip.dataset.word;
+                zoneElement.innerText = word;
+                zoneElement.dataset.val = word;
+                zoneElement.classList.add('filled');
+                
+                activeWordChip.classList.remove('selected');
+                activeWordChip.classList.add('used');
+                activeWordChip = null;
+            }
+        }
+
+        // --- Auth System ---
+        function checkLogin() {
+            if(localStorage.getItem('studentId')) {
+                document.getElementById('userProfile').classList.remove('hidden');
+                document.getElementById('p_name').innerText = localStorage.getItem('studentName');
+                document.getElementById('p_room').innerText = localStorage.getItem('studentRoom');
+                document.getElementById('p_id').innerText = localStorage.getItem('studentId'); 
+            }
+        }
+
+        document.getElementById('in_room').addEventListener('blur', function() {
+            let nums = this.value.match(/\d+/g);
+            if (nums && nums.length >= 2) this.value = `ม.${nums[0]}/${nums[1]}`;
+            else if (nums && nums.length === 1) this.value = `ม.1/${nums[0]}`;
+        });
+
+        function switchAccount() {
+            localStorage.clear();
+            document.getElementById('userProfile').classList.add('hidden');
+            document.getElementById('loginModal').classList.add('active');
+        }
+
+        function confirmUser() {
+            let n = document.getElementById('in_name').value.trim();
+            let r = document.getElementById('in_room').value.trim();
+            let id = document.getElementById('in_id').value.trim();
+            if(!n || !r || id.length !== 5) { Swal.fire('ไม่ครบ', 'กรุณากรอกให้ครบและรหัส 5 หลัก', 'warning'); return; }
+            
+            localStorage.setItem('studentName', n); 
+            localStorage.setItem('studentRoom', r); 
+            localStorage.setItem('studentId', id);
+            document.getElementById('loginModal').classList.remove('active');
+            checkLogin();
+            
+            if(isWaitingSubmit) submitData();
+        }
+
+        // --- Grading System ---
+        function gradeQuiz() {
+            let allAnswered = true;
+            score = 0;
+
+            for (let i = 1; i <= 7; i++) {
+                let q = document.getElementById(`q${i}`);
+                if (!q.dataset.val) { allAnswered = false; }
+            }
+
+            if(!allAnswered) { Swal.fire('เตือน', 'กรุณาเติมคำให้ครบทุกภาพ', 'warning'); return; }
+
+            for (let i = 1; i <= 7; i++) {
+                let q = document.getElementById(`q${i}`);
+                if (q.dataset.val === answers[`q${i}`]) { 
+                    q.classList.add('correct'); 
+                    score++; 
+                } else { 
+                    q.classList.add('wrong'); 
+                    document.getElementById(`ans${i}`).innerText = `เฉลย: ${answers[`q${i}`]}`;
+                }
+            }
+            
+            if(!localStorage.getItem('studentId')) {
+                isWaitingSubmit = true;
+                document.getElementById('loginModal').classList.add('active');
+            } else {
+                submitData();
+            }
+        }
+
+        function submitData() {
+            isWaitingSubmit = false;
+            document.getElementById('scoreModal').classList.add('active');
+            document.getElementById('finalScore').innerText = score;
+            document.getElementById('submitBtn').classList.add('hidden');
+            document.getElementById('resetBtn').classList.remove('hidden');
+
+            const stat = document.getElementById('saveStatus');
+            if(typeof QUIZ_CONFIG === 'undefined') { stat.innerText = "❌ ไม่พบการเชื่อมต่อ Sheet"; return; }
+
+            stat.innerText = "⏳ กำลังส่งคะแนน...";
+            fetch(QUIZ_CONFIG.SCRIPT_URL, { 
+                method: 'POST', mode: 'no-cors', 
+                body: JSON.stringify({ name: localStorage.getItem('studentName'), room: localStorage.getItem('studentRoom'), studentId: "'"+localStorage.getItem('studentId'), lesson: TOPIC_NAME, score: score, maxScore: 7 }) 
+            }).catch(e=>{});
+
+            setTimeout(() => { stat.innerText = "✅ บันทึกคะแนนเรียบร้อย!"; }, 1500);
+        }
+
+        function closeScore() { document.getElementById('scoreModal').classList.remove('active'); }
+
+        function resetQuiz() {
+            score = 0;
+            document.getElementById('submitBtn').classList.remove('hidden');
+            document.getElementById('resetBtn').classList.add('hidden');
+
+            for (let i = 1; i <= 7; i++) {
+                let q = document.getElementById(`q${i}`);
+                q.innerText = "";
+                q.dataset.val = "";
+                q.classList.remove('correct', 'wrong', 'filled');
+                document.getElementById(`ans${i}`).innerText = "";
+            }
+            
+            document.querySelectorAll('.word-chip').forEach(el => {
+                el.classList.remove('used', 'selected');
+            });
+            activeWordChip = null;
+            window.scrollTo(0, 0);
+        }
+    </script>
+</body>
+</html>
