@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>General Vocab Flipcard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Sarabun:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --main: #0ea5e9; --dark: #0284c7; --success: #22c55e; --success-dark: #16a34a; }
+        body { 
+            font-family: 'Sarabun', sans-serif; 
+            margin: 0; padding: 15px; 
+            background: #f0f9ff;
+            min-height: 100vh;
+        }
+        
+        .container { max-width: 1000px; margin: 0 auto; background: white; border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        
+        h1 { font-family: 'Fredoka One', cursive; color: var(--main); text-align: center; font-size: 26px; margin: 5px 0 15px 0; }
+        
+        .progress-indicator { text-align: center; font-size: 16px; font-weight: bold; color: #64748b; margin-bottom: 20px; }
+
+        /* Flipcard Grid */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+            justify-content: center;
+        }
+        @media (max-width: 450px) {
+            .card-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .flip-card {
+            background-color: transparent;
+            width: 100%;
+            aspect-ratio: 1 / 1; 
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+
+        .flip-card.flipped .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 3px solid #bae6fd;
+            padding: 10px;
+            transition: all 0.3s ease;
+        }
+
+        /* ด้านหน้าการ์ด */
+        .flip-card-front {
+            background-color: white;
+        }
+        
+        .speaker-btn {
+            background: #fef08a;
+            border: 2px solid #ca8a04;
+            color: #854d0e;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+            position: absolute;
+            top: 8px;
+            right: 8px;
+        }
+        .speaker-btn:active { transform: scale(0.9); background: #fde047; }
+
+        .vocab-eng {
+            font-family: 'Fredoka One', cursive;
+            font-size: 18px;
+            color: #1e293b;
+            line-height: 1.2;
+            word-break: break-word;
+        }
+
+        /* ด้านหลังการ์ด */
+        .flip-card-back {
+            background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+            color: white;
+            transform: rotateY(180deg);
+            border-color: #0284c7;
+        }
+
+        .vocab-thai {
+            font-size: 18px;
+            font-weight: 800;
+            line-height: 1.4;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
+        /* คลาสไฮไลท์สีเขียวเมื่อเปิดแล้ว */
+        .flip-card.completed .flip-card-front {
+            border-color: var(--success);
+            background-color: #f0fdf4;
+        }
+        .flip-card.completed .flip-card-back {
+            background: linear-gradient(135deg, var(--success-dark), var(--success));
+            border-color: var(--success-dark);
+        }
+
+    </style>
+</head>
+<body>
+    
+    <div class="container" id="gameContainer">
+        <h1>📚 General Vocab Flipcard</h1>
+        
+        <div class="progress-indicator" id="progressIndicator">เปิดการ์ด: 0 / 31</div>
+
+        <div class="card-grid" id="cardGrid"></div>
+    </div>
+
+    <script>
+        // ข้อมูลการ์ดทั้ง 31 ใบ พร้อมคำแปลและไฟล์เสียงอิงตามรูป
+        const vocabList = [
+            { id: "v1", word: "pack (v.)", translation: "จัด (กระเป๋า)", audio: "pack.mp3" },
+            { id: "v2", word: "need (v.)", translation: "จำเป็นต้องใช้", audio: "need.mp3" },
+            { id: "v3", word: "vary (v.)", translation: "แตกต่างกัน,<br>เปลี่ยนแปลง", audio: "vary.mp3" },
+            
+            { id: "adj1", word: "late (adj.)", translation: "ปลาย<br>(เช่น late August)", audio: "late.mp3" },
+            { id: "adj2", word: "long-sleeved (adj.)", translation: "แขนยาว", audio: "long-sleeved.mp3" },
+            { id: "adj3", word: "short-sleeved (adj.)", translation: "แขนสั้น", audio: "short-sleeved.mp3" },
+            { id: "adj4", word: "north-west (adj.)", translation: "ตะวันตก<br>เฉียงเหนือ", audio: "north-west.mp3" },
+            { id: "adj5", word: "south-west (adj.)", translation: "ตะวันตก<br>เฉียงใต้", audio: "south-west.mp3" },
+            { id: "adj6", word: "right (adj.)", translation: "ที่เหมาะสม,<br>ที่ถูกต้อง", audio: "right.mp3" },
+            
+            { id: "n1", word: "Alaska (n.)", translation: "อะแลสกา", audio: "Alaska2.mp3" },
+            { id: "n2", word: "Spain (n.)", translation: "ประเทศสเปน", audio: "Spain2.mp3" },
+            { id: "n3", word: "Turkey (n.)", translation: "ประเทศตุรกี", audio: "Turkey.mp3" },
+            { id: "n4", word: "Bering Sea (n.)", translation: "ทะเลเบริง", audio: "Bering_Sea.mp3" },
+            { id: "n5", word: "Pacific Ocean (n.)", translation: "มหาสมุทร<br>แปซิฟิก", audio: "Pacific_Ocean.mp3" },
+            { id: "n6", word: "region (n.)", translation: "ภูมิภาค", audio: "region.mp3" },
+            { id: "n7", word: "corner (n.)", translation: "มุม, พื้นที่", audio: "corner.mp3" },
+            { id: "n8", word: "climate (n.)", translation: "ภูมิอากาศ", audio: "climate.mp3" },
+            { id: "n9", word: "weather (n.)", translation: "สภาพอากาศ", audio: "weather.mp3" },
+            { id: "n10", word: "season (n.)", translation: "ฤดูกาล", audio: "season.mp3" },
+            { id: "n11", word: "summer (n.)", translation: "ฤดูร้อน", audio: "summer2.mp3" },
+            { id: "n12", word: "winter (n.)", translation: "ฤดูหนาว", audio: "winter2.mp3" },
+            { id: "n13", word: "spring (n.)", translation: "ฤดูใบไม้ผลิ", audio: "spring2.mp3" },
+            { id: "n14", word: "autumn (n.)", translation: "ฤดูใบไม้ร่วง", audio: "autumn2.mp3" },
+            { id: "n15", word: "temperature (n.)", translation: "อุณหภูมิ", audio: "temperature.mp3" },
+            { id: "n16", word: "early morning (n.)", translation: "ตอนเช้าตรู่", audio: "early_morning.mp3" },
+            { id: "n17", word: "night time (n.)", translation: "เวลากลางคืน", audio: "night_time.mp3" },
+            
+            { id: "c1", word: "sandals (n.)", translation: "รองเท้าแตะ<br>รัดส้น", audio: "sandals.mp3" },
+            { id: "c2", word: "flip-flops (n.)", translation: "รองเท้าแตะ<br>หูคีบ", audio: "flip-flops.mp3" },
+            { id: "c3", word: "sunglasses (n.)", translation: "แว่นตากันแดด", audio: "sunglasses.mp3" },
+            { id: "c4", word: "swimsuit (n.)", translation: "ชุดว่ายน้ำ", audio: "swimsuit.mp3" },
+            { id: "c5", word: "umbrella (n.)", translation: "ร่ม", audio: "umbrella.mp3" }
+        ];
+
+        let flippedCards = new Set();
+        let currentAudio = null;
+
+        window.onload = () => { 
+            startGame(); 
+        };
+
+        function startGame() {
+            vocabList.sort(() => Math.random() - 0.5); 
+            renderCards();
+        }
+
+        function renderCards() {
+            const grid = document.getElementById('cardGrid');
+            grid.innerHTML = '';
+
+            vocabList.forEach(item => {
+                let card = document.createElement('div');
+                card.className = "flip-card";
+                card.id = `card-${item.id}`;
+                card.innerHTML = `
+                    <div class="flip-card-inner" id="inner-${item.id}">
+                        <div class="flip-card-front" onclick="handleFlip('${item.id}')">
+                            <div class="speaker-btn" onclick="playAudio(event, '${item.audio}')">🔊</div>
+                            <div class="vocab-eng">${item.word}</div>
+                        </div>
+                        <div class="flip-card-back" onclick="handleFlip('${item.id}')">
+                            <div class="vocab-thai">${item.translation}</div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function handleFlip(id) {
+            const cardElement = document.getElementById(`card-${id}`);
+            const cardInner = document.getElementById(`inner-${id}`);
+            
+            cardInner.parentElement.classList.toggle('flipped');
+
+            // เพิ่มคลาส completed (ไฮไลท์สีเขียว) เมื่อเปิด
+            if (!cardElement.classList.contains('completed')) {
+                cardElement.classList.add('completed');
+                flippedCards.add(id);
+                updateProgress();
+            }
+        }
+
+        function playAudio(event, audioSrc) {
+            event.stopPropagation();
+            
+            if(currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+            }
+            currentAudio = new Audio(audioSrc);
+            currentAudio.play().catch(e => console.log("รอไฟล์เสียงอัปโหลด..."));
+        }
+
+        function updateProgress() {
+            document.getElementById('progressIndicator').innerText = `เปิดการ์ด: ${flippedCards.size} / ${vocabList.length}`;
+        }
+    </script>
+</body>
+</html>
