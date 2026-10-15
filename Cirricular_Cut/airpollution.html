@@ -45,7 +45,14 @@
         }
 
         .header-title { font-family: 'Fredoka One', cursive; color: var(--main-theme); text-align: center; margin: 0 0 15px 0; font-size: 26px;}
-        
+        .instruction-text {
+    text-align: center;
+    color: #ea580c; /* สีส้มเข้มให้เข้ากับธีม */
+    font-weight: 800;
+    font-size: 15px;
+    margin-top: -10px; /* ดึงให้ชิดขอบบนขึ้นมาหน่อย */
+    margin-bottom: 15px;
+                          }
         /* Audio Player */
         .audio-controls {
             display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px;
@@ -174,7 +181,7 @@
 
     <div class="game-container">
         <h1 class="header-title">Curricular Cut</h1>
-
+        <p class="instruction-text">👆 แตะที่คำศัพท์ แล้วไปแตะที่ช่องว่างเพื่อวางคำตอบ</p>
         <div class="audio-controls">
             <button class="play-btn" onclick="toggleAudio()">▶</button>
             <span class="audio-text">Listen to the text</span>
