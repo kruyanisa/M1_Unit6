@@ -236,8 +236,7 @@
         </div>
     </div>
 
-<script>
-    const TOPIC_NAME = 'ม.1 Unit 6 Cirricular Cut What Weather!';
+const TOPIC_NAME = 'ม.1 Unit 6 Cirricular Cut What Weather!';
     const MAX_Q = 4;
     let score = 0;
     let isSwitchingAccount = false;
@@ -252,7 +251,7 @@
     }
     audio.onended = () => { playBtn.innerText = "▶"; };
 
-    // ระบบ Drag & Drop
+    // ระบบ Drag & Drop (แก้ไขพิกัด Scroll แล้ว)
     let draggedElement = null;
     let offsetX = 0, offsetY = 0;
     let clone = null;
@@ -284,18 +283,28 @@
         });
     });
 
+    // ดึงพิกัด X อิงตามหน้าเอกสาร (รวม Scroll)
+    function getPageX(e) {
+        return e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+    }
+    // ดึงพิกัด Y อิงตามหน้าเอกสาร (รวม Scroll)
+    function getPageY(e) {
+        return e.type.includes('mouse') ? e.pageY : e.touches[0].pageY;
+    }
+
     function handleStart(e) {
         if(isGraded) return;
         if(e.type === 'mousedown' && e.button !== 0) return;
         if(e.target.classList.contains('dropped')) return;
         
         draggedElement = e.target;
-        const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-        const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+        const pageX = getPageX(e);
+        const pageY = getPageY(e);
         
+        // ใช้ getBoundingClientRect เพื่อหา offset ภายในปุ่มบวกกับ scroll
         const rect = draggedElement.getBoundingClientRect();
-        offsetX = clientX - rect.left;
-        offsetY = clientY - rect.top;
+        offsetX = pageX - (rect.left + window.scrollX);
+        offsetY = pageY - (rect.top + window.scrollY);
 
         clone = draggedElement.cloneNode(true);
         clone.classList.add('dragging');
@@ -303,16 +312,20 @@
         
         draggedElement.style.opacity = '0.3'; 
         
-        moveClone(clientX, clientY);
+        moveClone(pageX, pageY);
     }
 
     function handleMove(e) {
         if(!draggedElement || !clone) return;
         e.preventDefault();
         
+        const pageX = getPageX(e);
+        const pageY = getPageY(e);
+        moveClone(pageX, pageY);
+
+        // เช็ค Drop Zone (ใช้ clientX/Y เพราะ getBoundingClientRect เทียบกับ viewport)
         const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
         const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
-        moveClone(clientX, clientY);
 
         dropZones.forEach(zone => {
             const zRect = zone.getBoundingClientRect();
@@ -504,6 +517,5 @@
         wordsArray.sort(() => Math.random() - 0.5);
         wordsArray.forEach(w => wordsBank.appendChild(w));
     }
-</script>
 </body>
 </html>
