@@ -22,7 +22,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            overflow-x: hidden; /* ป้องกันการเลื่อนซ้ายขวาตอนลาก */
+            overflow-x: hidden;
         }
 
         /* Profile Bar */
@@ -56,33 +56,48 @@
         .play-btn:active { transform: translateY(2px); box-shadow: none; }
         .audio-text { font-weight: 800; color: #475569; }
 
-        /* Poem Area (รูปภาพพื้นหลัง + ข้อความกวี) */
+        /* Poem Area */
         .poem-board {
             position: relative;
             width: 100%;
-            aspect-ratio: 9/16;
-            background-image: url('WhatWeather.jpg'); /* อิงชื่อไฟล์ที่คุณครูอัปโหลด */
+            /* ลบ aspect-ratio ตายตัวออก เพื่อให้ยืดตามความสูงของเนื้อหาข้างในได้ */
+            min-height: 600px; 
+            background-image: url('WhatWeather.jpg');
             background-size: cover;
             background-position: center;
             border-radius: 15px;
             box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
             border: 3px solid #d4d4d8;
-            padding: 20px;
+            padding: 15px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
+            justify-content: flex-start; /* จัดเนื้อหาชิดบน */
             overflow: hidden;
         }
 
-        /* กล่องบังพื้นหลังให้ข้อความอ่านง่าย */
         .poem-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(2px);
+            background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(2px);
             z-index: 1;
         }
 
         .poem-content {
             position: relative; z-index: 2;
+            display: flex; flex-direction: column; align-items: center;
+            width: 100%;
+        }
+
+        /* กล่องคำศัพท์ ย้ายมาอยู่ด้านในรูปภาพ */
+        .words-bank {
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
+            width: 100%; background: rgba(255, 251, 235, 0.75); /* โปร่งแสงนิดๆ */
+            padding: 12px; border-radius: 15px; border: 2px dashed #fcd34d;
+            margin-bottom: 20px; box-sizing: border-box;
+            min-height: 50px;
+        }
+
+        .poem-text-container {
             font-family: 'Playfair Display', serif;
             color: #1c1917; text-align: center;
             font-size: 1.1rem; line-height: 1.6;
@@ -93,10 +108,10 @@
 
         .poem-stanza { margin-bottom: 20px; }
 
-        /* จุด Drop zone (สำหรับวางคำศัพท์) */
+        /* Drop Zone */
         .drop-zone {
             display: inline-block;
-            width: 100px; height: 30px;
+            width: 90px; height: 30px;
             background: rgba(255,255,255,0.7);
             border: 2px dashed #9ca3af;
             border-radius: 8px;
@@ -107,20 +122,13 @@
         .drop-zone.active { background: rgba(254, 243, 199, 0.9); border-color: #f59e0b; border-style: solid; }
         .drop-zone.filled { border-style: solid; background: rgba(255,255,255,0.9); border-color: #d97706; padding: 0;}
 
-        /* โซนคำศัพท์ต้นทาง (ลากจากตรงนี้) */
-        .words-bank {
-            display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
-            margin-top: 20px; background: #fffbeb; padding: 15px; border-radius: 15px; border: 2px dashed #fcd34d;
-            min-height: 50px;
-        }
-
-        /* ชิ้นคำศัพท์ (Draggable Items) */
+        /* Draggable Words */
         .draggable-word {
             background: white; border: 2px solid #d97706; color: #b45309;
-            padding: 5px 15px; border-radius: 20px; font-weight: 800; font-size: 16px;
+            padding: 5px 12px; border-radius: 20px; font-weight: 800; font-size: 15px;
             box-shadow: 0 3px 0 #d97706; cursor: grab; user-select: none;
             font-family: 'Sarabun', sans-serif;
-            touch-action: none; /* สำคัญมากสำหรับมือถือ ป้องกันจอเลื่อนตอนลาก */
+            touch-action: none;
             z-index: 100;
         }
         .draggable-word:active { cursor: grabbing; box-shadow: none; transform: translateY(3px); }
@@ -162,40 +170,44 @@
         <div class="audio-controls">
             <button class="play-btn" onclick="toggleAudio()">▶</button>
             <span class="audio-text">Listen to the poem</span>
-            <audio id="poemAudio" src="What weather.mp3"></audio> <!-- อิงชื่อไฟล์เสียงที่คุณครูอัปโหลด -->
+            <audio id="poemAudio" src="Whatweather.mp3"></audio>
         </div>
 
         <!-- กระดานบทกวี -->
         <div class="poem-board" id="poemBoard">
             <div class="poem-overlay"></div>
+            
             <div class="poem-content">
-                <div class="poem-title">What Weather!</div>
-                <div class="poem-author">by Angela Fletcher</div>
-
-                <div class="poem-stanza">
-                    The 1) <div class="drop-zone" data-correct="leaves"></div> are blowing away<br>
-                    Up, up and away they go.<br>
-                    Swish, swoosh, they go.<br>
-                    Like a dancing ballerina.<br>
-                    Up, up and away they go.<br>
-                    Way up, in the 2) <div class="drop-zone" data-correct="sky"></div> .
+                <!-- กล่องคำศัพท์ ย้ายมาด้านบน -->
+                <div class="words-bank" id="wordsBank">
+                    <div class="draggable-word" data-word="sky">sky</div>
+                    <div class="draggable-word" data-word="branches">branches</div>
+                    <div class="draggable-word" data-word="wind">wind</div>
+                    <div class="draggable-word" data-word="leaves">leaves</div>
                 </div>
 
-                <div class="poem-stanza">
-                    The trees are standing there,<br>
-                    Their 3) <div class="drop-zone" data-correct="branches"></div> all bare*.<br>
-                    The 4) <div class="drop-zone" data-correct="wind"></div> is getting louder,<br>
-                    What's the weather like today?
+                <!-- เนื้อหาบทกวี -->
+                <div class="poem-text-container">
+                    <div class="poem-title">What Weather!</div>
+                    <div class="poem-author">by Angela Fletcher</div>
+
+                    <div class="poem-stanza">
+                        The 1) <div class="drop-zone" data-correct="leaves"></div> are blowing away<br>
+                        Up, up and away they go.<br>
+                        Swish, swoosh, they go.<br>
+                        Like a dancing ballerina.<br>
+                        Up, up and away they go.<br>
+                        Way up, in the 2) <div class="drop-zone" data-correct="sky"></div> .
+                    </div>
+
+                    <div class="poem-stanza">
+                        The trees are standing there,<br>
+                        Their 3) <div class="drop-zone" data-correct="branches"></div> all bare*.<br>
+                        The 4) <div class="drop-zone" data-correct="wind"></div> is getting louder,<br>
+                        What's the weather like today?
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <!-- กล่องคำศัพท์ (ลากไปวาง) -->
-        <div class="words-bank" id="wordsBank">
-            <div class="draggable-word" data-word="sky">sky</div>
-            <div class="draggable-word" data-word="branches">branches</div>
-            <div class="draggable-word" data-word="wind">wind</div>
-            <div class="draggable-word" data-word="leaves">leaves</div>
         </div>
 
         <button class="btn-submit" onclick="gradeQuiz()">✅ ส่งคำตอบ</button>
@@ -231,9 +243,7 @@
     let isSwitchingAccount = false;
     let isGraded = false;
 
-    /* =========================================
-       ระบบเสียง Audio Player
-       ========================================= */
+    // ระบบเสียง Audio Player
     const audio = document.getElementById('poemAudio');
     const playBtn = document.querySelector('.play-btn');
     function toggleAudio() {
@@ -242,5 +252,258 @@
     }
     audio.onended = () => { playBtn.innerText = "▶"; };
 
-    /* =========================================
-       ระบบ Drag & Drop (รอง
+    // ระบบ Drag & Drop
+    let draggedElement = null;
+    let offsetX = 0, offsetY = 0;
+    let clone = null;
+
+    const words = document.querySelectorAll('.draggable-word');
+    const dropZones = document.querySelectorAll('.drop-zone');
+    const wordsBank = document.getElementById('wordsBank');
+
+    // สุ่มตำแหน่งคำศัพท์ตอนเริ่ม
+    const wordsArray = Array.from(words);
+    wordsArray.sort(() => Math.random() - 0.5);
+    wordsArray.forEach(w => wordsBank.appendChild(w));
+
+    words.forEach(word => {
+        word.addEventListener('touchstart', handleStart, {passive: false});
+        word.addEventListener('touchmove', handleMove, {passive: false});
+        word.addEventListener('touchend', handleEnd);
+        
+        word.addEventListener('mousedown', handleStart);
+        document.addEventListener('mousemove', handleMove);
+        document.addEventListener('mouseup', handleEnd);
+
+        word.addEventListener('click', function() {
+            if(this.classList.contains('dropped') && !isGraded) {
+                this.classList.remove('dropped');
+                this.parentElement.classList.remove('filled');
+                wordsBank.appendChild(this);
+            }
+        });
+    });
+
+    function handleStart(e) {
+        if(isGraded) return;
+        if(e.type === 'mousedown' && e.button !== 0) return;
+        if(e.target.classList.contains('dropped')) return;
+        
+        draggedElement = e.target;
+        const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+        const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+        
+        const rect = draggedElement.getBoundingClientRect();
+        offsetX = clientX - rect.left;
+        offsetY = clientY - rect.top;
+
+        clone = draggedElement.cloneNode(true);
+        clone.classList.add('dragging');
+        document.body.appendChild(clone);
+        
+        draggedElement.style.opacity = '0.3'; 
+        
+        moveClone(clientX, clientY);
+    }
+
+    function handleMove(e) {
+        if(!draggedElement || !clone) return;
+        e.preventDefault();
+        
+        const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+        const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+        moveClone(clientX, clientY);
+
+        dropZones.forEach(zone => {
+            const zRect = zone.getBoundingClientRect();
+            if(clientX >= zRect.left && clientX <= zRect.right && clientY >= zRect.top && clientY <= zRect.bottom) {
+                if(!zone.hasChildNodes() || zone.classList.contains('filled')===false) zone.classList.add('active');
+            } else {
+                zone.classList.remove('active');
+            }
+        });
+    }
+
+    function moveClone(x, y) {
+        clone.style.left = (x - offsetX) + 'px';
+        clone.style.top = (y - offsetY) + 'px';
+    }
+
+    function handleEnd(e) {
+        if(!draggedElement || !clone) return;
+        
+        const clientX = e.type.includes('mouse') ? e.clientX : e.changedTouches[0].clientX;
+        const clientY = e.type.includes('mouse') ? e.clientY : e.changedTouches[0].clientY;
+        
+        dropZones.forEach(zone => {
+            zone.classList.remove('active');
+            const zRect = zone.getBoundingClientRect();
+            if(clientX >= zRect.left && clientX <= zRect.right && clientY >= zRect.top && clientY <= zRect.bottom) {
+                if(zone.children.length === 0) {
+                    draggedElement.classList.add('dropped');
+                    zone.classList.add('filled');
+                    zone.appendChild(draggedElement);
+                }
+            }
+        });
+
+        draggedElement.style.opacity = '1';
+        document.body.removeChild(clone);
+        clone = null;
+        draggedElement = null;
+    }
+
+    // ระบบ Login และ ส่งคะแนน
+    window.onload = () => { checkLoginStatus(); };
+
+    function gradeQuiz() {
+        if(isGraded) return;
+        
+        const placedWords = document.querySelectorAll('.drop-zone .draggable-word');
+        if(placedWords.length < 4) {
+            Swal.fire('อ๊ะ!', 'กรุณาลากคำศัพท์เติมให้ครบทุกช่องก่อนส่งนะจ๊ะ', 'warning');
+            return;
+        }
+
+        score = 0;
+        isGraded = true;
+        
+        dropZones.forEach(zone => {
+            const child = zone.children[0];
+            const correctAns = zone.getAttribute('data-correct');
+            const userAns = child.getAttribute('data-word');
+
+            if(userAns === correctAns) {
+                score++;
+                zone.classList.add('correct-bg');
+                child.style.color = '#15803d';
+            } else {
+                zone.classList.add('wrong-bg');
+                child.style.color = '#b91c1c';
+            }
+        });
+
+        if(!localStorage.getItem('studentId')) {
+            document.getElementById('modalTitle').innerText = "👋 ยอดเยี่ยม!";
+            document.getElementById('modalSub').innerText = `ได้คะแนน ${score}/${MAX_Q} กรอกข้อมูลเพื่อบันทึก`;
+            document.getElementById('modalSub').style.display = 'block';
+            document.getElementById('loginModal').classList.add('active');
+        } else { 
+            submitScore(); 
+        }
+    }
+
+    function checkLoginStatus() {
+        if(localStorage.getItem('studentId')) {
+            document.getElementById('userProfile').style.display = 'flex';
+            document.getElementById('p_name').innerText = localStorage.getItem('studentName');
+            document.getElementById('p_room').innerText = localStorage.getItem('studentRoom');
+            document.getElementById('p_id').innerText = localStorage.getItem('studentId'); 
+        } else {
+            document.getElementById('userProfile').style.display = 'none';
+        }
+    }
+
+    function switchAccount() {
+        Swal.fire({
+            title: '⚠️ เปลี่ยนคนเล่น?', text: "ข้อมูลเดิมจะถูกสลับออกนะ", icon: 'warning',
+            showCancelButton: true, confirmButtonColor: '#16a34a', cancelButtonColor: '#9ca3af',
+            confirmButtonText: 'ตกลง', cancelButtonText: 'ยกเลิก'
+        }).then((res) => {
+            if(res.isConfirmed) {
+                localStorage.clear(); isSwitchingAccount = true;
+                document.getElementById('in_name').value = ''; 
+                document.getElementById('in_room').value = ''; 
+                document.getElementById('in_id').value = '';
+                document.getElementById('modalTitle').innerText = "🔄 ลงชื่อบัญชีใหม่";
+                document.getElementById('modalSub').innerText = "กรอกข้อมูลเพื่อเล่นต่อ";
+                document.getElementById('modalSub').style.display = 'block';
+                checkLoginStatus(); 
+                document.getElementById('loginModal').classList.add('active');
+            }
+        });
+    }
+
+    document.getElementById('in_room').addEventListener('blur', function() {
+        let nums = this.value.match(/\d+/g);
+        if (nums && nums.length >= 2) this.value = `ม.${nums[0]}/${nums[1]}`;
+        else if (nums && nums.length === 1) this.value = `ม.1/${nums[0]}`;
+    });
+
+    function confirmUser() {
+        let n = document.getElementById('in_name').value.trim();
+        let r = document.getElementById('in_room').value.trim();
+        let id = document.getElementById('in_id').value.trim();
+        if(!n || !r || id.length !== 5) { Swal.fire('ข้อมูลไม่ครบ!', 'กรุณากรอกชื่อ ห้อง และรหัส 5 หลัก', 'warning'); return; }
+        
+        localStorage.setItem('studentName', n); 
+        localStorage.setItem('studentRoom', r); 
+        localStorage.setItem('studentId', id);
+        
+        document.getElementById('loginModal').classList.remove('active'); 
+        checkLoginStatus();
+
+        if (isSwitchingAccount) { 
+            isSwitchingAccount = false;
+            restartQuiz(); 
+        } else { 
+            submitScore(); 
+        }
+    }
+
+    function submitScore() {
+        document.getElementById('scoreModal').classList.add('active');
+        document.getElementById('finalScoreText').innerText = score;
+        const stat = document.getElementById('saveStatus');
+        const playAgainBtn = document.getElementById('playAgainBtn');
+        checkLoginStatus();
+
+        if(typeof QUIZ_CONFIG === 'undefined' || !QUIZ_CONFIG.SCRIPT_URL) {
+            stat.innerText = "❌ ไม่พบไฟล์ตั้งค่าการเชื่อมต่อ (quiz-config.js)"; 
+            playAgainBtn.style.display = 'block'; return;
+        }
+
+        stat.innerText = "⏳ กำลังส่งคะแนน...";
+        stat.style.color = "var(--dark-theme)";
+        playAgainBtn.style.display = 'none';
+
+        const payload = {
+            name: localStorage.getItem('studentName'), 
+            room: localStorage.getItem('studentRoom'),
+            studentId: "'" + localStorage.getItem('studentId'), 
+            lesson: TOPIC_NAME, 
+            score: score, 
+            maxScore: MAX_Q
+        };
+
+        fetch(QUIZ_CONFIG.SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) })
+            .catch(e => console.error(e));
+
+        setTimeout(() => {
+            stat.innerText = "✅ บันทึกคะแนนลงระบบเรียบร้อย!"; 
+            stat.style.color = "#15803d";
+            playAgainBtn.style.display = 'block';
+        }, 2000);
+    }
+
+    function restartQuiz() {
+        document.getElementById('scoreModal').classList.remove('active');
+        isGraded = false;
+        
+        dropZones.forEach(zone => {
+            zone.classList.remove('filled', 'correct-bg', 'wrong-bg');
+            if(zone.children.length > 0) {
+                const w = zone.children[0];
+                w.classList.remove('dropped');
+                w.style.color = '#b45309';
+                wordsBank.appendChild(w);
+            }
+        });
+
+        const wordsArray = Array.from(words);
+        wordsArray.sort(() => Math.random() - 0.5);
+        wordsArray.forEach(w => wordsBank.appendChild(w));
+    }
+</script>
+</body>
+</html>
