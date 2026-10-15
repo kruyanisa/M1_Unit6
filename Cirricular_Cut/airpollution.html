@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Air Pollution - Drag and Drop</title>
+    <title>Air Pollution - Tap & Place</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Sarabun:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://kruyanisa.github.io/classroom-core/quiz-config.js"></script>
 
     <style>
         :root {
-            --main-theme: #f97316; /* โทนสีส้มตามธีมหนังสือ */
+            --main-theme: #f97316; 
             --dark-theme: #c2410c; 
             --accent-theme: #fff7ed;
             --shadow-3d: rgba(249, 115, 22, 0.15);
@@ -67,20 +67,32 @@
             min-height: 60px;
         }
 
-        /* Draggable Words */
-        .draggable-word {
+        /* Tapable Words */
+        .tap-word {
             background: white; border: 2px solid var(--main-theme); color: var(--dark-theme);
             padding: 6px 12px; border-radius: 20px; font-weight: 800; font-size: 15px;
-            box-shadow: 0 3px 0 var(--main-theme); cursor: grab; user-select: none;
+            box-shadow: 0 3px 0 var(--main-theme); cursor: pointer; user-select: none;
             font-family: 'Sarabun', sans-serif;
-            touch-action: none;
-            z-index: 100;
+            transition: all 0.2s ease;
         }
-        .draggable-word:active { cursor: grabbing; box-shadow: none; transform: translateY(3px); }
-        .draggable-word.dragging { opacity: 0.8; transform: scale(1.1); position: absolute; pointer-events: none; }
-        .draggable-word.dropped { width: 100%; height: 100%; box-shadow: none; border: none; background: transparent; padding: 0; line-height: 26px; color: var(--dark-theme); cursor: pointer; text-align: center;}
+        /* สถานะถูกกดเลือก (สว่างขึ้น/เรืองแสง) */
+        .tap-word.selected {
+            background: #fed7aa; /* สีส้มอ่อน */
+            border-color: #ea580c;
+            transform: scale(1.1);
+            box-shadow: 0 0 12px rgba(234, 88, 12, 0.5);
+            color: #9a3412;
+            z-index: 10;
+        }
+        
+        /* สถานะถูกวางไปแล้ว */
+        .tap-word.dropped { 
+            width: 100%; height: 100%; box-shadow: none; border: none; background: transparent; 
+            padding: 0; line-height: 26px; color: var(--dark-theme); cursor: pointer; text-align: center;
+            transform: scale(1);
+        }
 
-        /* --- Infographic Layout (เหมือนในหนังสือ) --- */
+        /* Infographic Layout */
         .worksheet-box {
             border: 2px solid #fb923c;
             border-radius: 8px;
@@ -90,14 +102,9 @@
 
         .worksheet-title { font-size: 20px; font-weight: 800; text-align: center; margin-bottom: 15px; color: #0f172a; }
         .section-header { text-align: center; font-size: 16px; font-weight: 600; color: #334155; margin: 10px 0; }
-        
         .divider { height: 2px; background: #0f172a; margin: 15px 0; }
         
-        .grid-2col {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
+        .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .col-header { text-align: center; font-weight: 600; font-size: 15px; border-bottom: 1px solid #94a3b8; padding-bottom: 5px; margin-bottom: 10px;}
         
         .bullet-list { list-style-type: none; padding-left: 0; margin: 0; }
@@ -105,7 +112,7 @@
         .bullet-list li::before { content: "•"; color: #0f172a; font-weight: bold; position: absolute; left: 0; }
         .eg-text { font-size: 14px; color: #64748b; margin-left: 15px;}
 
-        /* Drop Zone */
+        /* Drop Zone (Click Zone) */
         .drop-zone {
             display: inline-block;
             min-width: 90px; height: 30px;
@@ -116,11 +123,19 @@
             margin: 0 4px;
             transition: 0.2s;
             position: relative;
+            cursor: pointer;
         }
-        .drop-zone.active { background: #ffedd5; border-color: #fb923c; border-style: solid; }
-        .drop-zone.filled { border-style: solid; background: #fff7ed; border-color: #ea580c; padding: 0;}
+        .drop-zone:hover { background: #f1f5f9; border-color: #64748b; }
+        /* เอฟเฟกต์ดึงดูดสายตาตอนที่มีคำศัพท์เลือกไว้เตรียมวาง */
+        .drop-zone.waiting-drop { background: #ffedd5; border-color: #fb923c; border-style: dashed; animation: pulse-border 1.5s infinite;}
+        .drop-zone.filled { border-style: solid; background: #fff7ed; border-color: #ea580c; padding: 0; animation: none;}
 
-        /* ปรับขนาดช่องให้พอดีคำ */
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 0 0 rgba(251, 146, 60, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(251, 146, 60, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(251, 146, 60, 0); }
+        }
+
         .dz-sm { min-width: 60px; }
         .dz-md { min-width: 80px; }
         .dz-lg { min-width: 100px; }
@@ -168,20 +183,19 @@
 
         <!-- Words Bank -->
         <div class="words-bank" id="wordsBank">
-            <div class="draggable-word" data-word="irritation">irritation</div>
-            <div class="draggable-word" data-word="cut down">cut down</div>
-            <div class="draggable-word" data-word="nausea">nausea</div>
-            <div class="draggable-word" data-word="pneumonia">pneumonia</div>
-            <div class="draggable-word" data-word="aerosols">aerosols</div>
-            <div class="draggable-word" data-word="lung">lung</div>
-            <div class="draggable-word" data-word="chimneys">chimneys</div>
-            <div class="draggable-word" data-word="cooking">cooking</div>
-            <div class="draggable-word" data-word="unleaded">unleaded</div>
-            <div class="draggable-word" data-word="bicycles">bicycles</div>
-            <div class="draggable-word" data-word="industries">industries</div>
+            <div class="tap-word" data-word="irritation">irritation</div>
+            <div class="tap-word" data-word="cut down">cut down</div>
+            <div class="tap-word" data-word="nausea">nausea</div>
+            <div class="tap-word" data-word="pneumonia">pneumonia</div>
+            <div class="tap-word" data-word="aerosols">aerosols</div>
+            <div class="tap-word" data-word="lung">lung</div>
+            <div class="tap-word" data-word="chimneys">chimneys</div>
+            <div class="tap-word" data-word="cooking">cooking</div>
+            <div class="tap-word" data-word="unleaded">unleaded</div>
+            <div class="tap-word" data-word="bicycles">bicycles</div>
+            <div class="tap-word" data-word="industries">industries</div>
         </div>
 
-        <!-- Infographic Layout -->
         <div class="worksheet-box">
             <div class="worksheet-title">Types of air pollution</div>
             
@@ -271,110 +285,80 @@
     }
     audio.onended = () => { playBtn.innerText = "▶"; };
 
-    // ระบบ Drag & Drop
-    let draggedElement = null;
-    let offsetX = 0, offsetY = 0;
-    let clone = null;
-
-    const words = document.querySelectorAll('.draggable-word');
+    /* =========================================
+       ระบบ Tap & Place (แตะเลือก -> แตะวาง)
+       ========================================= */
+    let selectedWord = null;
+    const words = document.querySelectorAll('.tap-word');
     const dropZones = document.querySelectorAll('.drop-zone');
     const wordsBank = document.getElementById('wordsBank');
 
+    // สุ่มตำแหน่งคำศัพท์ตอนเริ่ม
     const wordsArray = Array.from(words);
     wordsArray.sort(() => Math.random() - 0.5);
     wordsArray.forEach(w => wordsBank.appendChild(w));
 
+    // การคลิกที่คำศัพท์
     words.forEach(word => {
-        word.addEventListener('touchstart', handleStart, {passive: false});
-        word.addEventListener('touchmove', handleMove, {passive: false});
-        word.addEventListener('touchend', handleEnd);
-        
-        word.addEventListener('mousedown', handleStart);
-        document.addEventListener('mousemove', handleMove);
-        document.addEventListener('mouseup', handleEnd);
+        word.addEventListener('click', function(e) {
+            if(isGraded) return;
+            e.stopPropagation(); // ป้องกันการติดอีเวนต์ของช่องว่างซ้ำซ้อน
 
-        word.addEventListener('click', function() {
-            if(this.classList.contains('dropped') && !isGraded) {
+            // กรณีที่ 1: ถ้าคำนี้อยู่ในช่องว่างไปแล้ว (เตะกลับเข้าตะกร้า)
+            if(this.classList.contains('dropped')) {
                 this.classList.remove('dropped');
+                this.classList.remove('selected');
                 this.parentElement.classList.remove('filled');
                 wordsBank.appendChild(this);
+                if(selectedWord === this) {
+                    selectedWord = null;
+                    clearWaitingState();
+                }
+                return;
+            }
+
+            // กรณีที่ 2: อยู่ในตะกร้า 
+            if(selectedWord === this) {
+                // กดซ้ำเพื่อยกเลิกการเลือก
+                this.classList.remove('selected');
+                selectedWord = null;
+                clearWaitingState();
+            } else {
+                // เปลี่ยนตัวเลือก
+                if(selectedWord) selectedWord.classList.remove('selected');
+                this.classList.add('selected');
+                selectedWord = this;
+                addWaitingState(); // ไฮไลท์หลุมเพื่อบอกว่า "กดวางได้เลย"
             }
         });
     });
 
-    function getPageX(e) { return e.type.includes('mouse') ? e.pageX : e.touches[0].pageX; }
-    function getPageY(e) { return e.type.includes('mouse') ? e.pageY : e.touches[0].pageY; }
+    // การคลิกที่ช่องว่าง (Drop zone)
+    dropZones.forEach(zone => {
+        zone.addEventListener('click', function() {
+            if(isGraded) return;
 
-    function handleStart(e) {
-        if(isGraded) return;
-        if(e.type === 'mousedown' && e.button !== 0) return;
-        if(e.target.classList.contains('dropped')) return;
-        
-        draggedElement = e.target;
-        const pageX = getPageX(e);
-        const pageY = getPageY(e);
-        
-        const rect = draggedElement.getBoundingClientRect();
-        offsetX = pageX - (rect.left + window.scrollX);
-        offsetY = pageY - (rect.top + window.scrollY);
-
-        clone = draggedElement.cloneNode(true);
-        clone.classList.add('dragging');
-        document.body.appendChild(clone);
-        
-        draggedElement.style.opacity = '0.3'; 
-        
-        moveClone(pageX, pageY);
-    }
-
-    function handleMove(e) {
-        if(!draggedElement || !clone) return;
-        e.preventDefault();
-        
-        const pageX = getPageX(e);
-        const pageY = getPageY(e);
-        moveClone(pageX, pageY);
-
-        const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-        const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
-
-        dropZones.forEach(zone => {
-            const zRect = zone.getBoundingClientRect();
-            if(clientX >= zRect.left && clientX <= zRect.right && clientY >= zRect.top && clientY <= zRect.bottom) {
-                if(!zone.hasChildNodes() || zone.classList.contains('filled')===false) zone.classList.add('active');
-            } else {
-                zone.classList.remove('active');
+            // ถ้าหลุมนี้ว่าง และมีคำศัพท์ที่ถูกเลือกไว้
+            if(this.children.length === 0 && selectedWord) {
+                selectedWord.classList.remove('selected');
+                selectedWord.classList.add('dropped');
+                this.classList.add('filled');
+                this.appendChild(selectedWord);
+                
+                selectedWord = null;
+                clearWaitingState();
             }
         });
-    }
+    });
 
-    function moveClone(x, y) {
-        clone.style.left = (x - offsetX) + 'px';
-        clone.style.top = (y - offsetY) + 'px';
-    }
-
-    function handleEnd(e) {
-        if(!draggedElement || !clone) return;
-        
-        const clientX = e.type.includes('mouse') ? e.clientX : e.changedTouches[0].clientX;
-        const clientY = e.type.includes('mouse') ? e.clientY : e.changedTouches[0].clientY;
-        
-        dropZones.forEach(zone => {
-            zone.classList.remove('active');
-            const zRect = zone.getBoundingClientRect();
-            if(clientX >= zRect.left && clientX <= zRect.right && clientY >= zRect.top && clientY <= zRect.bottom) {
-                if(zone.children.length === 0) {
-                    draggedElement.classList.add('dropped');
-                    zone.classList.add('filled');
-                    zone.appendChild(draggedElement);
-                }
-            }
+    // ฟังก์ชันสร้าง Effect เตือนว่า "มีคำเตรียมวางนะ"
+    function addWaitingState() {
+        dropZones.forEach(z => {
+            if(z.children.length === 0) z.classList.add('waiting-drop');
         });
-
-        draggedElement.style.opacity = '1';
-        document.body.removeChild(clone);
-        clone = null;
-        draggedElement = null;
+    }
+    function clearWaitingState() {
+        dropZones.forEach(z => z.classList.remove('waiting-drop'));
     }
 
     // ระบบ Login และ ส่งคะแนน
@@ -383,14 +367,17 @@
     function gradeQuiz() {
         if(isGraded) return;
         
-        const placedWords = document.querySelectorAll('.drop-zone .draggable-word');
+        const placedWords = document.querySelectorAll('.drop-zone .tap-word');
         if(placedWords.length < MAX_Q) {
-            Swal.fire('อ๊ะ!', 'กรุณาลากคำศัพท์เติมให้ครบทุกช่องก่อนส่งนะจ๊ะ', 'warning');
+            Swal.fire('อ๊ะ!', 'กรุณาแตะคำศัพท์เติมให้ครบทุกช่องก่อนส่งนะจ๊ะ', 'warning');
             return;
         }
 
         score = 0;
         isGraded = true;
+        clearWaitingState();
+        if(selectedWord) selectedWord.classList.remove('selected');
+        selectedWord = null;
         
         dropZones.forEach(zone => {
             const child = zone.children[0];
@@ -513,12 +500,14 @@
     function restartQuiz() {
         document.getElementById('scoreModal').classList.remove('active');
         isGraded = false;
+        selectedWord = null;
+        clearWaitingState();
         
         dropZones.forEach(zone => {
             zone.classList.remove('filled', 'correct-bg', 'wrong-bg');
             if(zone.children.length > 0) {
                 const w = zone.children[0];
-                w.classList.remove('dropped');
+                w.classList.remove('dropped', 'selected');
                 w.style.color = 'var(--dark-theme)';
                 wordsBank.appendChild(w);
             }
