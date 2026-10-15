@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>What Weather! - Poem Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Sarabun:wght@400;600;800&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://kruyanisa.github.io/classroom-core/quiz-config.js"></script>
+
+    <style>
+        :root {
+            --main-theme: #d97706; --dark-theme: #b45309; --accent-theme: #fffbeb;
+            --shadow-3d: rgba(180, 83, 9, 0.15);
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            margin: 0; padding: 10px;
+            background-color: #f8fafc;
+            color: #334155;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden; /* ป้องกันการเลื่อนซ้ายขวาตอนลาก */
+        }
+
+        /* Profile Bar */
+        .profile-bar {
+            font-size: clamp(12px, 3.5vw, 14px); background: #fef3c7; border: 2px solid #fcd34d;
+            padding: 8px 15px; border-radius: 20px; color: var(--dark-theme); font-weight: bold;
+            display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 15px; width: 100%; max-width: 500px;
+        }
+        .btn-switch { background: #fca5a5; color: white; border: none; padding: 4px 12px; border-radius: 12px; cursor: pointer; font-family: 'Sarabun'; font-weight: bold; }
+
+        /* Game Container */
+        .game-container {
+            width: 100%; max-width: 500px;
+            background: white; border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 15px; box-sizing: border-box;
+            position: relative;
+        }
+
+        .header-title { font-family: 'Fredoka One', cursive; color: var(--main-theme); text-align: center; margin: 0 0 15px 0; font-size: 24px;}
+        
+        /* Audio Player */
+        .audio-controls {
+            display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px;
+            background: #f1f5f9; padding: 10px; border-radius: 15px; border: 2px solid #e2e8f0;
+        }
+        .play-btn {
+            background: var(--main-theme); color: white; border: none; width: 40px; height: 40px; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center; font-size: 18px; cursor: pointer; box-shadow: 0 3px 0 var(--dark-theme);
+        }
+        .play-btn:active { transform: translateY(2px); box-shadow: none; }
+        .audio-text { font-weight: 800; color: #475569; }
+
+        /* Poem Area (รูปภาพพื้นหลัง + ข้อความกวี) */
+        .poem-board {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 9/16;
+            background-image: url('WhatWeather.jpg'); /* อิงชื่อไฟล์ที่คุณครูอัปโหลด */
+            background-size: cover;
+            background-position: center;
+            border-radius: 15px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+            border: 3px solid #d4d4d8;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* กล่องบังพื้นหลังให้ข้อความอ่านง่าย */
+        .poem-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(2px);
+            z-index: 1;
+        }
+
+        .poem-content {
+            position: relative; z-index: 2;
+            font-family: 'Playfair Display', serif;
+            color: #1c1917; text-align: center;
+            font-size: 1.1rem; line-height: 1.6;
+        }
+
+        .poem-title { font-size: 2.2rem; font-weight: 600; font-style: italic; margin-bottom: 5px; color: #431407;}
+        .poem-author { font-size: 1rem; font-weight: 600; border-bottom: 1px solid #431407; display: inline-block; margin-bottom: 20px; color: #431407;}
+
+        .poem-stanza { margin-bottom: 20px; }
+
+        /* จุด Drop zone (สำหรับวางคำศัพท์) */
+        .drop-zone {
+            display: inline-block;
+            width: 100px; height: 30px;
+            background: rgba(255,255,255,0.7);
+            border: 2px dashed #9ca3af;
+            border-radius: 8px;
+            vertical-align: middle;
+            margin: 0 5px;
+            transition: 0.2s;
+        }
+        .drop-zone.active { background: rgba(254, 243, 199, 0.9); border-color: #f59e0b; border-style: solid; }
+        .drop-zone.filled { border-style: solid; background: rgba(255,255,255,0.9); border-color: #d97706; padding: 0;}
+
+        /* โซนคำศัพท์ต้นทาง (ลากจากตรงนี้) */
+        .words-bank {
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
+            margin-top: 20px; background: #fffbeb; padding: 15px; border-radius: 15px; border: 2px dashed #fcd34d;
+            min-height: 50px;
+        }
+
+        /* ชิ้นคำศัพท์ (Draggable Items) */
+        .draggable-word {
+            background: white; border: 2px solid #d97706; color: #b45309;
+            padding: 5px 15px; border-radius: 20px; font-weight: 800; font-size: 16px;
+            box-shadow: 0 3px 0 #d97706; cursor: grab; user-select: none;
+            font-family: 'Sarabun', sans-serif;
+            touch-action: none; /* สำคัญมากสำหรับมือถือ ป้องกันจอเลื่อนตอนลาก */
+            z-index: 100;
+        }
+        .draggable-word:active { cursor: grabbing; box-shadow: none; transform: translateY(3px); }
+        .draggable-word.dragging { opacity: 0.8; transform: scale(1.1); position: absolute; pointer-events: none; }
+        .draggable-word.dropped { width: 100%; height: 100%; box-shadow: none; border: none; background: transparent; padding: 0; line-height: 26px; color: #b45309; cursor: pointer; }
+
+        .btn-submit {
+            background: #22c55e; color: white; border: none; padding: 15px 20px; font-size: 18px; 
+            border-radius: 15px; cursor: pointer; font-weight: 800; width: 100%; box-shadow: 0 4px 0 #16a34a; font-family: 'Sarabun'; transition: 0.1s; margin-top: 15px;
+        }
+        .btn-submit:active { transform: translateY(4px); box-shadow: none; }
+
+        /* Modal UI */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(254,252,232,0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 2000; visibility: hidden; opacity: 0; transition: opacity 0.3s; padding: 15px; box-sizing: border-box; }
+        .modal-overlay.active { visibility: visible; opacity: 1; }
+        .modal-box { background: white; padding: 30px 20px; border-radius: 30px; text-align: center; width: 100%; max-width: 340px; border: 4px solid var(--main-theme); box-shadow: 8px 12px 25px var(--shadow-3d); box-sizing: border-box; }
+        .modal-box input { width: 100%; padding: 12px; margin-bottom: 12px; border: 2px solid var(--main-theme); border-radius: 15px; text-align: center; font-family: 'Sarabun'; font-size: 16px; font-weight: 600; box-sizing: border-box; outline: none; }
+        .modal-box input:focus { border-color: var(--dark-theme); }
+        .btn-action { width: 100%; padding: 14px; background: var(--main-theme); color: var(--accent-theme); border: none; border-radius: 15px; font-weight: 800; cursor: pointer; font-family: 'Sarabun'; box-shadow: 0 4px 0 var(--dark-theme); transition: 0.1s; font-size: 17px; }
+        .btn-action:active { transform: translateY(3px); box-shadow: none; }
+        .score-num { font-size: 55px; font-weight: 900; color: var(--dark-theme); margin: 10px 0; display: block; }
+        
+        .correct-bg { background-color: rgba(34, 197, 94, 0.2) !important; border-color: #16a34a !important; }
+        .wrong-bg { background-color: rgba(239, 68, 68, 0.2) !important; border-color: #dc2626 !important; }
+    </style>
+</head>
+<body>
+
+    <!-- แถบโปรไฟล์ -->
+    <div id="userProfile" class="profile-bar" style="display:none;">
+        <span>👤 <span id="p_name"></span> | 🏫 <span id="p_room"></span> | 🆔 <span id="p_id"></span></span>
+        <button class="btn-switch" onclick="switchAccount()">🔄 สลับ</button>
+    </div>
+
+    <div class="game-container">
+        <h1 class="header-title">Curricular Cut</h1>
+
+        <!-- ส่วนควบคุมเสียง -->
+        <div class="audio-controls">
+            <button class="play-btn" onclick="toggleAudio()">▶</button>
+            <span class="audio-text">Listen to the poem</span>
+            <audio id="poemAudio" src="What weather.mp3"></audio> <!-- อิงชื่อไฟล์เสียงที่คุณครูอัปโหลด -->
+        </div>
+
+        <!-- กระดานบทกวี -->
+        <div class="poem-board" id="poemBoard">
+            <div class="poem-overlay"></div>
+            <div class="poem-content">
+                <div class="poem-title">What Weather!</div>
+                <div class="poem-author">by Angela Fletcher</div>
+
+                <div class="poem-stanza">
+                    The 1) <div class="drop-zone" data-correct="leaves"></div> are blowing away<br>
+                    Up, up and away they go.<br>
+                    Swish, swoosh, they go.<br>
+                    Like a dancing ballerina.<br>
+                    Up, up and away they go.<br>
+                    Way up, in the 2) <div class="drop-zone" data-correct="sky"></div> .
+                </div>
+
+                <div class="poem-stanza">
+                    The trees are standing there,<br>
+                    Their 3) <div class="drop-zone" data-correct="branches"></div> all bare*.<br>
+                    The 4) <div class="drop-zone" data-correct="wind"></div> is getting louder,<br>
+                    What's the weather like today?
+                </div>
+            </div>
+        </div>
+
+        <!-- กล่องคำศัพท์ (ลากไปวาง) -->
+        <div class="words-bank" id="wordsBank">
+            <div class="draggable-word" data-word="sky">sky</div>
+            <div class="draggable-word" data-word="branches">branches</div>
+            <div class="draggable-word" data-word="wind">wind</div>
+            <div class="draggable-word" data-word="leaves">leaves</div>
+        </div>
+
+        <button class="btn-submit" onclick="gradeQuiz()">✅ ส่งคำตอบ</button>
+    </div>
+
+    <!-- Modal Login -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal-box">
+            <h2 id="modalTitle" style="color:var(--dark-theme); margin-top:0; font-size: 24px;">📝 ลงชื่อเข้าเรียน</h2>
+            <p id="modalSub" style="color: #6b7280; font-weight: 600; margin-top: 0; display:none; font-size: 14px;"></p>
+            <input type="text" id="in_name" placeholder="ชื่อ - นามสกุล">
+            <input type="text" id="in_room" placeholder="ชั้น/ห้อง (เช่น 1/1)">
+            <input type="text" id="in_id" placeholder="รหัสนักเรียน (5 หลัก)" maxlength="5">
+            <button class="btn-action" onclick="confirmUser()">🚀 ยืนยันข้อมูล</button>
+        </div>
+    </div>
+
+    <!-- Modal สรุปคะแนน -->
+    <div class="modal-overlay" id="scoreModal">
+        <div class="modal-box">
+            <h2 style="color:var(--dark-theme); margin-top:0; font-size: 26px;">🎉 ส่งคำตอบแล้ว!</h2>
+            <p style="color: #6b7280; font-weight: 600;">คะแนนของคุณคือ</p>
+            <span class="score-num"><span id="finalScoreText">0</span> / 4</span>
+            <div id="saveStatus" style="font-weight:bold; font-size:15px; margin-bottom:15px; color:#15803d;"></div>
+            <button id="playAgainBtn" class="btn-action" onclick="restartQuiz()" style="display:none;">🔄 เริ่มทำใหม่</button>
+        </div>
+    </div>
+
+<script>
+    const TOPIC_NAME = 'ม.1 Unit 6 Cirricular Cut What Weather!';
+    const MAX_Q = 4;
+    let score = 0;
+    let isSwitchingAccount = false;
+    let isGraded = false;
+
+    /* =========================================
+       ระบบเสียง Audio Player
+       ========================================= */
+    const audio = document.getElementById('poemAudio');
+    const playBtn = document.querySelector('.play-btn');
+    function toggleAudio() {
+        if(audio.paused) { audio.play(); playBtn.innerText = "⏸"; } 
+        else { audio.pause(); playBtn.innerText = "▶"; }
+    }
+    audio.onended = () => { playBtn.innerText = "▶"; };
+
+    /* =========================================
+       ระบบ Drag & Drop (รอง
