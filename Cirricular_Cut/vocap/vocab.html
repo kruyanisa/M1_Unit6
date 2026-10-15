@@ -1,1 +1,200 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Vocabulary Flipcards</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Sarabun:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --main-theme: #0284c7; 
+            --dark-theme: #0369a1; 
+            --bg-color: #f1f5f9;
+            --card-front: #ffffff;
+            --card-back: #fff7ed;
+            --success-color: #22c55e;
+            --success-bg: #f0fdf4;
+        }
 
+        body {
+            font-family: 'Sarabun', sans-serif;
+            margin: 0; padding: 15px;
+            background-color: var(--bg-color);
+            color: #334155;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header-title { font-family: 'Fredoka One', cursive; color: var(--main-theme); text-align: center; margin: 10px 0 5px 0; font-size: 28px;}
+        .sub-title { text-align: center; font-weight: 800; color: #64748b; margin-top: 0; margin-bottom: 25px;}
+
+        /* Grid Layout สำหรับการ์ด */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        /* 3D Flipcard CSS */
+        .flip-card {
+            background-color: transparent;
+            width: 100%;
+            height: 120px;
+            perspective: 1000px; /* สร้างมิติ 3D */
+            cursor: pointer;
+        }
+
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        /* พลิกการ์ดเมื่อมีคลาส .flipped */
+        .flip-card.flipped .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden; /* Safari */
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 3px solid #cbd5e1;
+            padding: 10px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        /* หน้าการ์ด (ภาษาอังกฤษ) */
+        .flip-card-front {
+            background-color: var(--card-front);
+            color: var(--dark-theme);
+        }
+        
+        .word-en {
+            font-family: 'Fredoka One', cursive;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        .play-icon {
+            font-size: 24px;
+            color: #94a3b8;
+        }
+
+        /* หลังการ์ด (ภาษาไทย) */
+        .flip-card-back {
+            background-color: var(--card-back);
+            color: #c2410c;
+            transform: rotateY(180deg);
+        }
+
+        .word-th {
+            font-weight: 800;
+            font-size: 16px;
+            line-height: 1.4;
+        }
+
+        /* สถานะเมื่อเรียนรู้แล้ว (สีเขียว) */
+        .flip-card.viewed .flip-card-front,
+        .flip-card.viewed .flip-card-back {
+            border-color: var(--success-color);
+            background-color: var(--success-bg);
+        }
+        
+        .flip-card.viewed .word-en { color: #166534; }
+        .flip-card.viewed .play-icon { color: var(--success-color); }
+        .flip-card.viewed .word-th { color: #166534; }
+
+    </style>
+</head>
+<body>
+
+    <h1 class="header-title">Vocabulary Words</h1>
+    <h2 class="sub-title">แตะที่การ์ดเพื่อฟังเสียงและดูคำแปล</h2>
+
+    <div class="cards-grid" id="cardsContainer">
+        <!-- การ์ดจะถูกสร้างด้วย JavaScript -->
+    </div>
+
+    <!-- Audio Player (ซ่อนไว้สำหรับเล่นเสียง) -->
+    <audio id="audioPlayer"></audio>
+
+<script>
+    // ข้อมูลคำศัพท์ ชื่อไฟล์เสียง (อิงตามรูป) และคำแปล
+    const vocabList = [
+        { en: "irritation", th: "การระคายเคือง", audio: "irritation.mp3" },
+        { en: "cut down", th: "ลด, ลดปริมาณ", audio: "cutdown.mp3" },
+        { en: "nausea", th: "อาการคลื่นไส้", audio: "nausea.mp3" },
+        { en: "pneumonia", th: "โรคปอดบวม", audio: "pneumonia.mp3" },
+        { en: "aerosols", th: "สเปรย์กระป๋อง", audio: "aerosols.mp3" },
+        { en: "lung", th: "ปอด", audio: "lung.mp3" },
+        { en: "chimneys", th: "ปล่องไฟ", audio: "chimneys.mp3" },
+        { en: "cooking", th: "การทำอาหาร", audio: "cooking.mp3" },
+        { en: "unleaded", th: "ไร้สารตะกั่ว", audio: "unleaded.mp3" },
+        { en: "bicycles", th: "รถจักรยาน", audio: "bicycles.mp3" },
+        { en: "industries", th: "อุตสาหกรรม", audio: "industries.mp3" },
+        { en: "stand", th: "ยืน, ตั้งอยู่", audio: "stand.mp3" },
+        { en: "air", th: "อากาศ", audio: "air.mp3" },
+        { en: "ballerina", th: "นักเต้นบัลเลต์", audio: "ballerina.mp3" },
+        { en: "branch", th: "กิ่งไม้", audio: "branch.mp3" },
+        { en: "blow away", th: "พัดปลิวไป", audio: "blowaway.mp3" },
+        { en: "go away", th: "พัดออกไป", audio: "goaway.mp3" },
+        { en: "go up", th: "ลอยขึ้นไป", audio: "goup.mp3" }
+    ];
+
+    const container = document.getElementById('cardsContainer');
+    const audioPlayer = document.getElementById('audioPlayer');
+
+    // สร้างการ์ด
+    vocabList.forEach((vocab, index) => {
+        const card = document.createElement('div');
+        card.className = 'flip-card';
+        card.innerHTML = `
+            <div class="flip-card-inner">
+                <div class="flip-card-front">
+                    <div class="word-en">${vocab.en}</div>
+                    <div class="play-icon">🔊</div>
+                </div>
+                <div class="flip-card-back">
+                    <div class="word-th">${vocab.th}</div>
+                </div>
+            </div>
+        `;
+
+        // Event เมื่อกดการ์ด
+        card.addEventListener('click', () => {
+            // 1. เล่นเสียง
+            audioPlayer.src = vocab.audio;
+            audioPlayer.play().catch(e => console.log("Audio play error:", e));
+
+            // 2. พลิกการ์ด
+            card.classList.toggle('flipped');
+
+            // 3. ไฮไลท์สีเขียว (เรียนรู้แล้ว)
+            if (!card.classList.contains('viewed')) {
+                card.classList.add('viewed');
+            }
+        });
+
+        container.appendChild(card);
+    });
+</script>
+
+</body>
+</html>
