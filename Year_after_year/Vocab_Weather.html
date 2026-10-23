@@ -2,27 +2,48 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vocabulary Flashcards</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Vocabulary Flashcards - Weather</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Sarabun:wght@600;800&display=swap" rel="stylesheet">
+    <!-- นำเข้า SweetAlert และ Config สำหรับ Google Sheets -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://kruyanisa.github.io/classroom-core/quiz-config.js"></script>
+    
     <style>
+        :root {
+            --main-theme: #0ea5e9; 
+            --dark-theme: #0284c7;
+        }
+
         body { 
             font-family: 'Sarabun', sans-serif; 
             background: #f0f9ff; 
             margin: 0; 
-            padding: 20px; 
+            padding: 15px 10px; 
             text-align: center; 
+            display: flex; flex-direction: column; align-items: center;
         }
-        h1 { font-family: 'Fredoka One', cursive; color: #0284c7; }
-        p { color: #64748b; margin-bottom: 30px; font-size: 18px; }
+        h1 { font-family: 'Fredoka One', cursive; color: var(--dark-theme); margin-top: 10px; margin-bottom: 5px;}
+        p { color: #64748b; margin-bottom: 20px; font-size: 16px; font-weight: 600; }
 
+        /* Profile Bar */
+        .profile-bar {
+            font-size: clamp(12px, 3.5vw, 14px); background: #e0f2fe; border: 2px solid var(--main-theme);
+            padding: 8px 15px; border-radius: 20px; color: var(--dark-theme); font-weight: bold;
+            display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 10px; width: 100%; max-width: 960px; box-sizing: border-box;
+        }
+        .btn-switch { background: #f43f5e; color: white; border: none; padding: 4px 12px; border-radius: 12px; cursor: pointer; font-family: 'Sarabun'; font-weight: bold; }
+
+        /* Grid & Cards */
         .grid { 
             display: grid; 
             grid-template-columns: repeat(3, 1fr);
             gap: 20px; 
+            width: 100%;
             max-width: 960px;
             margin: 0 auto;
             padding: 10px;
+            box-sizing: border-box;
         }
 
         .flip-card { 
@@ -68,7 +89,7 @@
             background-color: #dcfce7; 
             color: #16a34a; 
             transform: rotateY(180deg); 
-            font-size: 22px; 
+            font-size: clamp(18px, 4vw, 24px); 
             font-weight: 800; 
             border: 4px solid #86efac;
         }
@@ -85,8 +106,8 @@
         .vocab-container {
             display: flex;
             align-items: center;
-            justify-content: center; /* เปลี่ยนเป็น center เพื่อให้อยู่ตรงกลาง */
-            position: relative; /* เพิ่มบรรทัดนี้ */
+            justify-content: center; 
+            position: relative; 
             width: 100%;
             margin-top: 10px;
             padding: 0 5px;
@@ -94,15 +115,15 @@
 
         .vocab-text { 
             font-family: 'Fredoka One', cursive; 
-            font-size: 16px; 
+            font-size: clamp(14px, 3vw, 18px); 
             color: #334155; 
             margin: 0;
             white-space: nowrap; 
         }
 
         .play-btn { 
-            position: absolute; /* เพิ่มบรรทัดนี้ */
-            right: 5px; /* เพิ่มบรรทัดนี้ */
+            position: absolute; 
+            right: 5px; 
             background: #3b82f6; 
             color: white; 
             border: none; 
@@ -117,11 +138,23 @@
             box-shadow: 0 3px 0 #2563eb;
             transition: 0.1s;
         }
+        .play-btn:active { transform: translateY(3px); box-shadow: none; }
 
-        .play-btn:active { 
-            transform: translateY(3px); 
-            box-shadow: none; 
+        /* Submit Button */
+        .btn-action { 
+            width: 100%; max-width: 400px; padding: 15px; background: var(--main-theme); color: white; border: none; 
+            border-radius: 15px; font-weight: 800; cursor: pointer; font-family: 'Sarabun'; 
+            box-shadow: 0 6px 0 var(--dark-theme); transition: 0.1s; font-size: 20px; margin-top: 30px; margin-bottom: 20px;
         }
+        .btn-action:active { transform: translateY(6px); box-shadow: none; }
+
+        /* Modal UI */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(240,249,255,0.9); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 2000; visibility: hidden; opacity: 0; transition: 0.3s; padding: 15px; box-sizing: border-box; }
+        .modal-overlay.active { visibility: visible; opacity: 1; }
+        .modal-box { background: white; padding: 30px 20px; border-radius: 30px; text-align: center; width: 100%; max-width: 340px; border: 4px solid var(--main-theme); box-shadow: 0 15px 30px rgba(14, 165, 233, 0.2); box-sizing: border-box; }
+        .modal-box input.login-input { width: 100%; padding: 12px; margin-bottom: 12px; border: 2px solid var(--main-theme); border-radius: 15px; text-align: center; font-family: 'Sarabun'; font-size: 16px; font-weight: 600; box-sizing: border-box; outline: none; }
+        .modal-box input.login-input:focus { border-color: var(--dark-theme); }
+        .score-num { font-size: 60px; font-weight: 900; color: var(--dark-theme); margin: 10px 0; display: block; line-height: 1;}
 
         @media (max-width: 768px) {
             .grid { grid-template-columns: repeat(2, 1fr); }
@@ -135,6 +168,12 @@
 </head>
 <body>
 
+    <!-- แถบแสดงชื่อผู้ใช้ -->
+    <div id="userProfile" class="profile-bar" style="display:none;">
+        <span>👤 <span id="p_name"></span> | 🏫 <span id="p_room"></span> | 🆔 <span id="p_id"></span></span>
+        <button class="btn-switch" onclick="switchAccount()">🔄 สลับบัญชี</button>
+    </div>
+
     <h1>Weather Vocabulary</h1>
     <p>แตะที่ไอคอน 🔊 เพื่อฟังเสียง หรือ แตะที่การ์ดเพื่อดูคำแปล</p>
 
@@ -142,7 +181,39 @@
         <!-- การ์ดจะถูกสร้างด้วย JavaScript -->
     </div>
 
+    <!-- ปุ่มกดรับคะแนน -->
+    <button class="btn-action" onclick="claimScore()">✅ รับคะแนนการเข้าเรียน</button>
+
+    <!-- Modal Login -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal-box">
+            <h2 id="modalTitle" style="color:var(--dark-theme); margin-top:0; font-size: 24px;">📝 ลงชื่อรับคะแนน</h2>
+            <p id="modalSub" style="color: #64748b; font-weight: 600; margin-top: 0; font-size: 14px;">กรุณาลงชื่อเพื่อบันทึกสถิติการเข้าเรียนครับ</p>
+            <input type="text" id="in_name" class="login-input" placeholder="ชื่อ - นามสกุล">
+            <input type="text" id="in_room" class="login-input" placeholder="ชั้น/ห้อง (เช่น 1/1)">
+            <input type="text" id="in_id" class="login-input" placeholder="รหัสนักเรียน (5 หลัก)" maxlength="5">
+            <button class="btn-action" id="btnSubmitLogin" onclick="confirmUser()" style="margin-top:5px; margin-bottom: 0;">🚀 บันทึกคะแนน</button>
+        </div>
+    </div>
+
+    <!-- Modal Score/Success -->
+    <div class="modal-overlay" id="scoreModal">
+        <div class="modal-box">
+            <h2 style="color:var(--dark-theme); margin-top:0; font-size: 26px;">🎉 เช็คชื่อสำเร็จ!</h2>
+            <p style="color: #64748b; font-weight: 600; margin-bottom: 0;">คุณได้รับคะแนนการทบทวนคำศัพท์</p>
+            <span class="score-num"><span id="finalScoreText">10</span><span style="font-size:30px; color:#bae6fd;">/10</span></span>
+            <div id="saveStatus" style="font-weight:bold; font-size:15px; margin-bottom:15px; color:#15803d; min-height:22px;"></div>
+            <button class="btn-action" onclick="closeScoreModal()" style="margin-top:5px; margin-bottom: 0;">✅ ปิดหน้าต่าง</button>
+        </div>
+    </div>
+
 <script>
+    const TOPIC_NAME = 'ม.1 Weather Vocabulary Flashcards';
+    const MAX_SCORE = 10; // คะแนนเต็มสำหรับแค่เข้ามาเรียน
+    const SCORE = 10;     // ให้คะแนนเต็มทันทีที่กดส่ง
+    let isSwitchingAccount = false;
+    let currentAudio = null;
+
     const flashcards = [
         { id: 'wet_rainy', en: 'wet & rainy', th: 'ชื้นแฉะและมีฝนตก' },
         { id: 'cloudy_windy', en: 'cloudy & windy', th: 'มีเมฆมากและลมแรง' },
@@ -158,15 +229,13 @@
         grid.innerHTML += `
             <div class="flip-card" onclick="this.classList.toggle('flipped')">
                 <div class="flip-card-inner">
-                    <!-- ด้านหน้า (รูป + คำศัพท์อังกฤษ + ปุ่มฟังเสียง) -->
                     <div class="flip-card-front">
-                        <img src="${card.id}.jpg" class="card-img" alt="${card.en}">
+                        <img src="${card.id}.jpg" class="card-img" alt="${card.en}" onerror="this.src='https://placehold.co/400x225/bae6fd/0284c7?text=No+Image'">
                         <div class="vocab-container">
                             <h3 class="vocab-text">${card.en}</h3>
                             <button class="play-btn" onclick="playAudio(event, '${card.id}')">🔊</button>
                         </div>
                     </div>
-                    <!-- ด้านหลัง (คำแปลภาษาไทย) -->
                     <div class="flip-card-back">
                         ${card.th}
                     </div>
@@ -175,18 +244,125 @@
         `;
     });
 
-    let currentAudio = null;
-
     function playAudio(event, id) {
-        event.stopPropagation(); // ป้องกันไม่ให้การ์ดพลิกเวลากดปุ่มฟังเสียง
-        
+        event.stopPropagation();
         if (currentAudio) {
             currentAudio.pause();
             currentAudio.currentTime = 0;
         }
-        
         currentAudio = new Audio(`${id}.mp3`);
         currentAudio.play().catch(e => console.log('Audio error:', e));
+    }
+
+    // ================= ระบบลงชื่อ & ส่งคะแนน =================
+
+    document.addEventListener("DOMContentLoaded", () => {
+        if(localStorage.getItem('studentId')) {
+            document.getElementById('userProfile').style.display = 'flex';
+            document.getElementById('p_name').innerText = localStorage.getItem('studentName');
+            document.getElementById('p_room').innerText = localStorage.getItem('studentRoom');
+            document.getElementById('p_id').innerText = localStorage.getItem('studentId'); 
+        }
+    });
+
+    function claimScore() {
+        if(!localStorage.getItem('studentId')) {
+            document.getElementById('loginModal').classList.add('active');
+        } else {
+            submitScore();
+        }
+    }
+
+    function switchAccount() {
+        Swal.fire({
+            title: '⚠️ สลับบัญชี?', text: "ต้องการเปลี่ยนชื่อผู้เข้าเรียนใช่ไหม?", icon: 'warning',
+            showCancelButton: true, confirmButtonColor: '#0ea5e9', cancelButtonColor: '#94a3b8',
+            confirmButtonText: 'ตกลง', cancelButtonText: 'ยกเลิก'
+        }).then((res) => {
+            if(res.isConfirmed) {
+                localStorage.clear(); 
+                document.getElementById('userProfile').style.display = 'none';
+                isSwitchingAccount = true;
+                
+                document.getElementById('in_name').value = '';
+                document.getElementById('in_room').value = '';
+                document.getElementById('in_id').value = '';
+                
+                document.getElementById('loginModal').classList.add('active');
+            }
+        });
+    }
+
+    document.getElementById('in_room').addEventListener('blur', function() {
+        let nums = this.value.match(/\d+/g);
+        if (nums && nums.length >= 2) this.value = `ม.${nums[0]}/${nums[1]}`;
+        else if (nums && nums.length === 1) this.value = `ม.1/${nums[0]}`;
+    });
+
+    function confirmUser() {
+        let n = document.getElementById('in_name').value.trim();
+        let r = document.getElementById('in_room').value.trim();
+        let id = document.getElementById('in_id').value.trim();
+        if(!n || !r || id.length !== 5) { Swal.fire('ข้อมูลไม่ครบ!', 'กรุณากรอกชื่อ ห้อง และรหัส 5 หลัก', 'warning'); return; }
+        
+        localStorage.setItem('studentName', n); 
+        localStorage.setItem('studentRoom', r); 
+        localStorage.setItem('studentId', id);
+        
+        document.getElementById('loginModal').classList.remove('active');
+        document.getElementById('userProfile').style.display = 'flex';
+        document.getElementById('p_name').innerText = n;
+        document.getElementById('p_room').innerText = r;
+        document.getElementById('p_id').innerText = id; 
+        
+        submitScore();
+    }
+
+    function submitScore() {
+        document.getElementById('scoreModal').classList.add('active');
+        const stat = document.getElementById('saveStatus');
+        
+        if(typeof QUIZ_CONFIG === 'undefined' || !QUIZ_CONFIG.SCRIPT_URL) {
+            stat.innerText = "❌ ไม่พบไฟล์ตั้งค่า (quiz-config.js)"; 
+            return;
+        }
+
+        stat.innerText = "⏳ กำลังบันทึกการเข้าเรียน...";
+
+        const payload = {
+            name: localStorage.getItem('studentName'), 
+            room: localStorage.getItem('studentRoom'),
+            studentId: "'" + localStorage.getItem('studentId'), 
+            lesson: TOPIC_NAME, score: SCORE, maxScore: MAX_SCORE
+        };
+
+        fetch(QUIZ_CONFIG.SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) })
+            .catch(e => console.error(e));
+
+        setTimeout(() => {
+            stat.innerText = "✅ บันทึกคะแนนลงระบบเรียบร้อย!"; 
+            playSoundSuccess();
+        }, 1500);
+    }
+
+    function closeScoreModal() {
+        document.getElementById('scoreModal').classList.remove('active');
+    }
+
+    function playSoundSuccess() {
+        try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.type = "sine";
+            oscillator.frequency.setValueAtTime(500, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.5);
+        } catch(e) {}
     }
 </script>
 
