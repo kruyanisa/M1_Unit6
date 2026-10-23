@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Vocabulary Flashcards - Weather</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Sarabun:wght@600;800&display=swap" rel="stylesheet">
-    <!-- นำเข้า SweetAlert และ Config สำหรับ Google Sheets -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://kruyanisa.github.io/classroom-core/quiz-config.js"></script>
     
@@ -22,15 +21,16 @@
             padding: 15px 10px; 
             text-align: center; 
             display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh;
         }
         h1 { font-family: 'Fredoka One', cursive; color: var(--dark-theme); margin-top: 10px; margin-bottom: 5px;}
-        p { color: #64748b; margin-bottom: 20px; font-size: 16px; font-weight: 600; }
+        p { color: #64748b; margin-bottom: 20px; font-size: 15px; font-weight: 600; }
 
         /* Profile Bar */
         .profile-bar {
             font-size: clamp(12px, 3.5vw, 14px); background: #e0f2fe; border: 2px solid var(--main-theme);
             padding: 8px 15px; border-radius: 20px; color: var(--dark-theme); font-weight: bold;
-            display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 10px; width: 100%; max-width: 960px; box-sizing: border-box;
+            display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 15px; width: 100%; max-width: 960px; box-sizing: border-box;
         }
         .btn-switch { background: #f43f5e; color: white; border: none; padding: 4px 12px; border-radius: 12px; cursor: pointer; font-family: 'Sarabun'; font-weight: bold; }
 
@@ -53,6 +53,7 @@
             aspect-ratio: 4 / 3.2;
             perspective: 1000px; 
             cursor: pointer; 
+            position: relative;
         }
 
         .flip-card-inner { 
@@ -60,12 +61,37 @@
             width: 100%; 
             height: 100%; 
             text-align: center; 
-            transition: transform 0.6s; 
+            transition: transform 0.6s, box-shadow 0.3s; 
             transform-style: preserve-3d; 
+            border-radius: 20px;
         }
 
         .flip-card.flipped .flip-card-inner { 
             transform: rotateY(180deg); 
+        }
+
+        /* ไฮไลท์เมื่อฝึกสำเร็จ */
+        .flip-card.completed-highlight .flip-card-inner {
+            box-shadow: 0 0 0 4px #22c55e, 0 8px 16px rgba(34, 197, 94, 0.4);
+        }
+
+        .status-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: white;
+            border-radius: 50%;
+            font-size: 20px;
+            z-index: 10;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: none;
+        }
+        .flip-card.completed-highlight .status-badge { display: block; animation: pop 0.3s ease-out; }
+
+        @keyframes pop {
+            0% { transform: scale(0); }
+            80% { transform: scale(1.2); }
+            100% { transform: scale(1); }
         }
 
         .flip-card-front, .flip-card-back { 
@@ -104,49 +130,37 @@
         }
 
         .vocab-container {
-            display: flex;
-            align-items: center;
-            justify-content: center; 
-            position: relative; 
-            width: 100%;
-            margin-top: 10px;
-            padding: 0 5px;
+            display: flex; align-items: center; justify-content: center; 
+            position: relative; width: 100%; margin-top: 10px; padding: 0 5px;
         }
 
         .vocab-text { 
-            font-family: 'Fredoka One', cursive; 
-            font-size: clamp(14px, 3vw, 18px); 
-            color: #334155; 
-            margin: 0;
-            white-space: nowrap; 
+            font-family: 'Fredoka One', cursive; font-size: clamp(14px, 3vw, 18px); 
+            color: #334155; margin: 0; white-space: nowrap; 
         }
 
         .play-btn { 
-            position: absolute; 
-            right: 5px; 
-            background: #3b82f6; 
-            color: white; 
-            border: none; 
-            border-radius: 50%; 
-            width: 35px; 
-            height: 35px; 
-            cursor: pointer; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            font-size: 18px;
-            box-shadow: 0 3px 0 #2563eb;
-            transition: 0.1s;
+            position: absolute; right: 5px; background: #3b82f6; color: white; border: none; 
+            border-radius: 50%; width: 35px; height: 35px; cursor: pointer; display: flex; 
+            justify-content: center; align-items: center; font-size: 18px; box-shadow: 0 3px 0 #2563eb; transition: 0.1s;
         }
         .play-btn:active { transform: translateY(3px); box-shadow: none; }
+        .play-btn.played-glow { background: #10b981; box-shadow: 0 3px 0 #059669; }
 
-        /* Submit Button */
-        .btn-action { 
-            width: 100%; max-width: 400px; padding: 15px; background: var(--main-theme); color: white; border: none; 
-            border-radius: 15px; font-weight: 800; cursor: pointer; font-family: 'Sarabun'; 
-            box-shadow: 0 6px 0 var(--dark-theme); transition: 0.1s; font-size: 20px; margin-top: 30px; margin-bottom: 20px;
+        /* Buttons Layout */
+        .btn-group {
+            display: flex; gap: 15px; width: 100%; max-width: 600px; justify-content: center;
+            margin-top: 30px; margin-bottom: 30px; flex-wrap: wrap; padding: 0 10px; box-sizing: border-box;
         }
-        .btn-action:active { transform: translateY(6px); box-shadow: none; }
+        .btn-action { 
+            flex: 1; min-width: 200px; padding: 15px; color: white; border: none; 
+            border-radius: 15px; font-weight: 800; cursor: pointer; font-family: 'Sarabun'; 
+            transition: 0.1s; font-size: 18px;
+        }
+        .btn-submit { background: var(--main-theme); box-shadow: 0 6px 0 var(--dark-theme); }
+        .btn-submit:active { transform: translateY(6px); box-shadow: none; }
+        .btn-reset { background: #f59e0b; box-shadow: 0 6px 0 #b45309; }
+        .btn-reset:active { transform: translateY(6px); box-shadow: none; }
 
         /* Modal UI */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(240,249,255,0.9); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 2000; visibility: hidden; opacity: 0; transition: 0.3s; padding: 15px; box-sizing: border-box; }
@@ -168,49 +182,50 @@
 </head>
 <body>
 
-    <!-- แถบแสดงชื่อผู้ใช้ -->
     <div id="userProfile" class="profile-bar" style="display:none;">
         <span>👤 <span id="p_name"></span> | 🏫 <span id="p_room"></span> | 🆔 <span id="p_id"></span></span>
         <button class="btn-switch" onclick="switchAccount()">🔄 สลับบัญชี</button>
     </div>
 
     <h1>Weather Vocabulary</h1>
-    <p>แตะที่ไอคอน 🔊 เพื่อฟังเสียง หรือ แตะที่การ์ดเพื่อดูคำแปล</p>
+    <p>แตะไอคอน 🔊 เพื่อฟังเสียง และแตะการ์ดเพื่อดูคำแปลให้ครบทุกใบ (ได้ 1 คะแนนต่อใบ)</p>
 
     <div class="grid" id="flashcard-grid">
         <!-- การ์ดจะถูกสร้างด้วย JavaScript -->
     </div>
 
-    <!-- ปุ่มกดรับคะแนน -->
-    <button class="btn-action" onclick="claimScore()">✅ รับคะแนนการเข้าเรียน</button>
+    <div class="btn-group">
+        <button class="btn-action btn-reset" onclick="resetGame()">🔄 เริ่มใหม่ (Restart)</button>
+        <button class="btn-action btn-submit" onclick="trySubmit()">✅ ส่งคะแนน</button>
+    </div>
 
     <!-- Modal Login -->
     <div class="modal-overlay" id="loginModal">
         <div class="modal-box">
-            <h2 id="modalTitle" style="color:var(--dark-theme); margin-top:0; font-size: 24px;">📝 ลงชื่อรับคะแนน</h2>
-            <p id="modalSub" style="color: #64748b; font-weight: 600; margin-top: 0; font-size: 14px;">กรุณาลงชื่อเพื่อบันทึกสถิติการเข้าเรียนครับ</p>
+            <h2 id="modalTitle" style="color:var(--dark-theme); margin-top:0; font-size: 24px;">📝 ลงชื่อส่งคำตอบ</h2>
+            <p id="modalSub" style="color: #64748b; font-weight: 600; margin-top: 0; font-size: 14px;"></p>
             <input type="text" id="in_name" class="login-input" placeholder="ชื่อ - นามสกุล">
             <input type="text" id="in_room" class="login-input" placeholder="ชั้น/ห้อง (เช่น 1/1)">
             <input type="text" id="in_id" class="login-input" placeholder="รหัสนักเรียน (5 หลัก)" maxlength="5">
-            <button class="btn-action" id="btnSubmitLogin" onclick="confirmUser()" style="margin-top:5px; margin-bottom: 0;">🚀 บันทึกคะแนน</button>
+            <button class="btn-action btn-submit" id="btnSubmitLogin" onclick="confirmUser()" style="margin-top:5px; margin-bottom: 0;">🚀 บันทึกคะแนน</button>
         </div>
     </div>
 
     <!-- Modal Score/Success -->
     <div class="modal-overlay" id="scoreModal">
         <div class="modal-box">
-            <h2 style="color:var(--dark-theme); margin-top:0; font-size: 26px;">🎉 เช็คชื่อสำเร็จ!</h2>
-            <p style="color: #64748b; font-weight: 600; margin-bottom: 0;">คุณได้รับคะแนนการทบทวนคำศัพท์</p>
-            <span class="score-num"><span id="finalScoreText">10</span><span style="font-size:30px; color:#bae6fd;">/10</span></span>
+            <h2 style="color:var(--dark-theme); margin-top:0; font-size: 26px;">🎉 ส่งสำเร็จ!</h2>
+            <p style="color: #64748b; font-weight: 600; margin-bottom: 0;">คะแนนทบทวนคำศัพท์ของคุณ</p>
+            <span class="score-num"><span id="finalScoreText">0</span><span style="font-size:30px; color:#bae6fd;">/6</span></span>
             <div id="saveStatus" style="font-weight:bold; font-size:15px; margin-bottom:15px; color:#15803d; min-height:22px;"></div>
-            <button class="btn-action" onclick="closeScoreModal()" style="margin-top:5px; margin-bottom: 0;">✅ ปิดหน้าต่าง</button>
+            <button class="btn-action btn-submit" onclick="closeScoreModal()" style="margin-top:5px; margin-bottom: 0;">✅ ปิดหน้าต่าง</button>
         </div>
     </div>
 
 <script>
-    const TOPIC_NAME = 'ม.1 Weather Vocabulary Flashcards';
-    const MAX_SCORE = 10; // คะแนนเต็มสำหรับแค่เข้ามาเรียน
-    const SCORE = 10;     // ให้คะแนนเต็มทันทีที่กดส่ง
+    const TOPIC_NAME = 'ม.1 Unit 6 Weather Vocabulary Flashcards';
+    const MAX_SCORE = 6;
+    let score = 0;
     let isSwitchingAccount = false;
     let currentAudio = null;
 
@@ -223,27 +238,49 @@
         { id: 'chilly_foggy', en: 'chilly & foggy', th: 'หนาวเย็นและมีหมอก' }
     ];
 
-    const grid = document.getElementById('flashcard-grid');
+    // เก็บสถานะการทำกิจกรรมของการ์ดแต่ละใบ
+    let cardStates = {};
 
-    flashcards.forEach(card => {
-        grid.innerHTML += `
-            <div class="flip-card" onclick="this.classList.toggle('flipped')">
-                <div class="flip-card-inner">
-                    <div class="flip-card-front">
-                        <img src="${card.id}.jpg" class="card-img" alt="${card.en}" onerror="this.src='https://placehold.co/400x225/bae6fd/0284c7?text=No+Image'">
-                        <div class="vocab-container">
-                            <h3 class="vocab-text">${card.en}</h3>
-                            <button class="play-btn" onclick="playAudio(event, '${card.id}')">🔊</button>
+    function initGame() {
+        const grid = document.getElementById('flashcard-grid');
+        grid.innerHTML = '';
+        cardStates = {};
+
+        flashcards.forEach(card => {
+            cardStates[card.id] = { flipped: false, played: false, completed: false };
+            
+            grid.innerHTML += `
+                <div class="flip-card" id="card-${card.id}" onclick="toggleFlip('${card.id}')">
+                    <div class="status-badge" id="badge-${card.id}">✅</div>
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <img src="${card.id}.jpg" class="card-img" alt="${card.en}" onerror="this.src='https://placehold.co/400x225/bae6fd/0284c7?text=No+Image'">
+                            <div class="vocab-container">
+                                <h3 class="vocab-text">${card.en}</h3>
+                                <button class="play-btn" id="audio-btn-${card.id}" onclick="playAudio(event, '${card.id}')">🔊</button>
+                            </div>
+                        </div>
+                        <div class="flip-card-back">
+                            ${card.th}
                         </div>
                     </div>
-                    <div class="flip-card-back">
-                        ${card.th}
-                    </div>
                 </div>
-            </div>
-        `;
-    });
+            `;
+        });
+    }
 
+    // ทำงานเมื่อกดพลิกการ์ด
+    function toggleFlip(id) {
+        const cardElement = document.getElementById(`card-${id}`);
+        cardElement.classList.toggle('flipped');
+        
+        if (!cardStates[id].flipped) {
+            cardStates[id].flipped = true;
+            checkCardComplete(id);
+        }
+    }
+
+    // ทำงานเมื่อกดฟังเสียง
     function playAudio(event, id) {
         event.stopPropagation();
         if (currentAudio) {
@@ -252,11 +289,79 @@
         }
         currentAudio = new Audio(`${id}.mp3`);
         currentAudio.play().catch(e => console.log('Audio error:', e));
+
+        if (!cardStates[id].played) {
+            cardStates[id].played = true;
+            document.getElementById(`audio-btn-${id}`).classList.add('played-glow');
+            checkCardComplete(id);
+        }
+    }
+
+    // เช็คว่าการ์ดใบนั้น ฟังเสียง + พลิกดูคำแปล ครบหรือยัง
+    function checkCardComplete(id) {
+        if (cardStates[id].flipped && cardStates[id].played && !cardStates[id].completed) {
+            cardStates[id].completed = true;
+            document.getElementById(`card-${id}`).classList.add('completed-highlight');
+            playSoundMiniSuccess();
+        }
+    }
+
+    // คำนวณคะแนนปัจจุบัน
+    function calculateScore() {
+        return Object.values(cardStates).filter(state => state.completed).length;
+    }
+
+    function trySubmit() {
+        score = calculateScore();
+        if (score < MAX_SCORE) {
+            Swal.fire({
+                title: 'ยังฝึกไม่ครบทุกคำ!',
+                html: `หนูทำสำเร็จไป <b>${score}</b> คำ จากทั้งหมด <b>${MAX_SCORE}</b> คำ<br>(ต้องกดฟังเสียงและดูคำแปลให้ครบ)<br><br><i>ต้องการส่งคะแนนเท่านี้ หรือกลับไปฝึกต่อ?</i>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#f43f5e',
+                cancelButtonColor: '#0ea5e9',
+                confirmButtonText: 'ยืนยันส่งคะแนน',
+                cancelButtonText: 'กลับไปฝึกให้ครบ'
+            }).then((result) => {
+                if (result.isConfirmed) proceedToLogin();
+            });
+        } else {
+            proceedToLogin();
+        }
+    }
+
+    function proceedToLogin() {
+        if(!localStorage.getItem('studentId')) {
+            document.getElementById('modalSub').innerText = `คะแนนที่หนูทำได้คือ ${score}/${MAX_SCORE} คะแนน\nลงชื่อเพื่อส่งคะแนนครับ`;
+            document.getElementById('loginModal').classList.add('active');
+        } else {
+            submitScore();
+        }
+    }
+
+    function resetGame() {
+        Swal.fire({
+            title: 'เริ่มใหม่?',
+            text: "สถานะการฝึกทั้งหมดจะถูกล้าง",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#f59e0b',
+            cancelButtonColor: '#94a3b8',
+            confirmButtonText: 'ตกลง',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                if (currentAudio) currentAudio.pause();
+                initGame();
+            }
+        });
     }
 
     // ================= ระบบลงชื่อ & ส่งคะแนน =================
 
     document.addEventListener("DOMContentLoaded", () => {
+        initGame();
         if(localStorage.getItem('studentId')) {
             document.getElementById('userProfile').style.display = 'flex';
             document.getElementById('p_name').innerText = localStorage.getItem('studentName');
@@ -264,14 +369,6 @@
             document.getElementById('p_id').innerText = localStorage.getItem('studentId'); 
         }
     });
-
-    function claimScore() {
-        if(!localStorage.getItem('studentId')) {
-            document.getElementById('loginModal').classList.add('active');
-        } else {
-            submitScore();
-        }
-    }
 
     function switchAccount() {
         Swal.fire({
@@ -288,6 +385,7 @@
                 document.getElementById('in_room').value = '';
                 document.getElementById('in_id').value = '';
                 
+                document.getElementById('modalSub').innerText = "ลงชื่อเข้าใช้งานสำหรับนักเรียนคนใหม่";
                 document.getElementById('loginModal').classList.add('active');
             }
         });
@@ -320,6 +418,7 @@
 
     function submitScore() {
         document.getElementById('scoreModal').classList.add('active');
+        document.getElementById('finalScoreText').innerText = score;
         const stat = document.getElementById('saveStatus');
         
         if(typeof QUIZ_CONFIG === 'undefined' || !QUIZ_CONFIG.SCRIPT_URL) {
@@ -327,13 +426,13 @@
             return;
         }
 
-        stat.innerText = "⏳ กำลังบันทึกการเข้าเรียน...";
+        stat.innerText = "⏳ กำลังบันทึกคะแนน...";
 
         const payload = {
             name: localStorage.getItem('studentName'), 
             room: localStorage.getItem('studentRoom'),
             studentId: "'" + localStorage.getItem('studentId'), 
-            lesson: TOPIC_NAME, score: SCORE, maxScore: MAX_SCORE
+            lesson: TOPIC_NAME, score: score, maxScore: MAX_SCORE
         };
 
         fetch(QUIZ_CONFIG.SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) })
@@ -347,21 +446,38 @@
 
     function closeScoreModal() {
         document.getElementById('scoreModal').classList.remove('active');
+        if (score === MAX_SCORE) {
+            // ถ้าเต็มแล้วรีเซ็ตกระดานเตรียมให้คนอื่นเล่นต่อได้
+            initGame();
+        }
+    }
+
+    function playSoundMiniSuccess() {
+        try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+        } catch(e) {}
     }
 
     function playSoundSuccess() {
         try {
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            oscillator.type = "sine";
-            oscillator.frequency.setValueAtTime(500, audioCtx.currentTime);
-            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            oscillator.start();
-            oscillator.stop(audioCtx.currentTime + 0.5);
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(500, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.5);
         } catch(e) {}
     }
 </script>
