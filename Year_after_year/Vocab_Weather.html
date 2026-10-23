@@ -149,18 +149,15 @@
 
         /* Buttons Layout */
         .btn-group {
-            display: flex; gap: 15px; width: 100%; max-width: 600px; justify-content: center;
-            margin-top: 30px; margin-bottom: 30px; flex-wrap: wrap; padding: 0 10px; box-sizing: border-box;
+            display: flex; width: 100%; max-width: 400px; justify-content: center;
+            margin-top: 30px; margin-bottom: 30px; padding: 0 10px; box-sizing: border-box;
         }
         .btn-action { 
-            flex: 1; min-width: 200px; padding: 15px; color: white; border: none; 
+            width: 100%; padding: 15px; color: white; border: none; 
             border-radius: 15px; font-weight: 800; cursor: pointer; font-family: 'Sarabun'; 
-            transition: 0.1s; font-size: 18px;
+            transition: 0.1s; font-size: 20px; background: var(--main-theme); box-shadow: 0 6px 0 var(--dark-theme);
         }
-        .btn-submit { background: var(--main-theme); box-shadow: 0 6px 0 var(--dark-theme); }
-        .btn-submit:active { transform: translateY(6px); box-shadow: none; }
-        .btn-reset { background: #f59e0b; box-shadow: 0 6px 0 #b45309; }
-        .btn-reset:active { transform: translateY(6px); box-shadow: none; }
+        .btn-action:active { transform: translateY(6px); box-shadow: none; }
 
         /* Modal UI */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(240,249,255,0.9); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 2000; visibility: hidden; opacity: 0; transition: 0.3s; padding: 15px; box-sizing: border-box; }
@@ -195,19 +192,19 @@
     </div>
 
     <div class="btn-group">
-        <button class="btn-action btn-reset" onclick="resetGame()">🔄 เริ่มใหม่ (Restart)</button>
-        <button class="btn-action btn-submit" onclick="trySubmit()">✅ ส่งคะแนน</button>
+        <!-- เหลือแค่ปุ่มส่งคะแนนปุ่มเดียว -->
+        <button class="btn-action" onclick="trySubmit()">✅ ส่งคะแนน</button>
     </div>
 
     <!-- Modal Login -->
     <div class="modal-overlay" id="loginModal">
         <div class="modal-box">
-            <h2 id="modalTitle" style="color:var(--dark-theme); margin-top:0; font-size: 24px;">📝 ลงชื่อส่งคำตอบ</h2>
+            <h2 id="modalTitle" style="color:var(--dark-theme); margin-top:0; font-size: 24px;">📝 ลงชื่อใช้งาน</h2>
             <p id="modalSub" style="color: #64748b; font-weight: 600; margin-top: 0; font-size: 14px;"></p>
             <input type="text" id="in_name" class="login-input" placeholder="ชื่อ - นามสกุล">
             <input type="text" id="in_room" class="login-input" placeholder="ชั้น/ห้อง (เช่น 1/1)">
             <input type="text" id="in_id" class="login-input" placeholder="รหัสนักเรียน (5 หลัก)" maxlength="5">
-            <button class="btn-action btn-submit" id="btnSubmitLogin" onclick="confirmUser()" style="margin-top:5px; margin-bottom: 0;">🚀 บันทึกคะแนน</button>
+            <button class="btn-action" id="btnSubmitLogin" onclick="confirmUser()" style="margin-top:5px; margin-bottom: 0;">🚀 ยืนยัน</button>
         </div>
     </div>
 
@@ -218,15 +215,16 @@
             <p style="color: #64748b; font-weight: 600; margin-bottom: 0;">คะแนนทบทวนคำศัพท์ของคุณ</p>
             <span class="score-num"><span id="finalScoreText">0</span><span style="font-size:30px; color:#bae6fd;">/6</span></span>
             <div id="saveStatus" style="font-weight:bold; font-size:15px; margin-bottom:15px; color:#15803d; min-height:22px;"></div>
-            <button class="btn-action btn-submit" onclick="closeScoreModal()" style="margin-top:5px; margin-bottom: 0;">✅ ปิดหน้าต่าง</button>
+            <!-- ปุ่มปิดหน้าต่าง พร้อมรีสตาร์ทกระดานให้คนต่อไป -->
+            <button class="btn-action" onclick="closeScoreModal()" style="margin-top:5px; margin-bottom: 0;">✅ ปิดและเริ่มใหม่</button>
         </div>
     </div>
 
 <script>
-    const TOPIC_NAME = 'ม.1 Unit 6 Weather Vocabulary Flashcards';
+    const TOPIC_NAME = 'ม.1 Weather Vocabulary Flashcards';
     const MAX_SCORE = 6;
     let score = 0;
-    let isSwitchingAccount = false;
+    let isSubmitting = false; // ตัวแปรเช็คว่ากำลังล็อกอินเพื่อเริ่มเกม หรือล็อกอินเพื่อส่งคะแนน
     let currentAudio = null;
 
     const flashcards = [
@@ -245,6 +243,8 @@
         const grid = document.getElementById('flashcard-grid');
         grid.innerHTML = '';
         cardStates = {};
+        score = 0;
+        if(currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; }
 
         flashcards.forEach(card => {
             cardStates[card.id] = { flipped: false, played: false, completed: false };
@@ -333,29 +333,13 @@
 
     function proceedToLogin() {
         if(!localStorage.getItem('studentId')) {
-            document.getElementById('modalSub').innerText = `คะแนนที่หนูทำได้คือ ${score}/${MAX_SCORE} คะแนน\nลงชื่อเพื่อส่งคะแนนครับ`;
+            isSubmitting = true; // ตั้งค่าว่ากำลังลงชื่อเพื่อ "ส่งคะแนน"
+            document.getElementById('modalSub').innerText = `คะแนนที่ทำได้คือ ${score}/${MAX_SCORE}\nลงชื่อเพื่อบันทึกคะแนน`;
+            document.getElementById('btnSubmitLogin').innerText = "🚀 บันทึกคะแนน";
             document.getElementById('loginModal').classList.add('active');
         } else {
             submitScore();
         }
-    }
-
-    function resetGame() {
-        Swal.fire({
-            title: 'เริ่มใหม่?',
-            text: "สถานะการฝึกทั้งหมดจะถูกล้าง",
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#f59e0b',
-            cancelButtonColor: '#94a3b8',
-            confirmButtonText: 'ตกลง',
-            cancelButtonText: 'ยกเลิก'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                if (currentAudio) currentAudio.pause();
-                initGame();
-            }
-        });
     }
 
     // ================= ระบบลงชื่อ & ส่งคะแนน =================
@@ -372,20 +356,22 @@
 
     function switchAccount() {
         Swal.fire({
-            title: '⚠️ สลับบัญชี?', text: "ต้องการเปลี่ยนชื่อผู้เข้าเรียนใช่ไหม?", icon: 'warning',
+            title: '⚠️ สลับบัญชี?', text: "เปลี่ยนคนเล่น คำตอบบนกระดานจะถูกล้าง", icon: 'warning',
             showCancelButton: true, confirmButtonColor: '#0ea5e9', cancelButtonColor: '#94a3b8',
             confirmButtonText: 'ตกลง', cancelButtonText: 'ยกเลิก'
         }).then((res) => {
             if(res.isConfirmed) {
                 localStorage.clear(); 
                 document.getElementById('userProfile').style.display = 'none';
-                isSwitchingAccount = true;
+                
+                isSubmitting = false; // ตั้งค่าว่ากำลังลงชื่อเพื่อ "เริ่มเรียนใหม่" (ไม่ส่งคะแนน)
                 
                 document.getElementById('in_name').value = '';
                 document.getElementById('in_room').value = '';
                 document.getElementById('in_id').value = '';
                 
-                document.getElementById('modalSub').innerText = "ลงชื่อเข้าใช้งานสำหรับนักเรียนคนใหม่";
+                document.getElementById('modalSub').innerText = "ลงชื่อเข้าใช้งานสำหรับนักเรียนคนใหม่ (กดตกลงเพื่อเริ่มฝึก)";
+                document.getElementById('btnSubmitLogin').innerText = "🚀 เริ่มฝึกทบทวน";
                 document.getElementById('loginModal').classList.add('active');
             }
         });
@@ -413,7 +399,12 @@
         document.getElementById('p_room').innerText = r;
         document.getElementById('p_id').innerText = id; 
         
-        submitScore();
+        // แยกว่าเป็นการกดลงชื่อเพื่อส่งคะแนน หรือ แค่ลงชื่อเริ่มเล่นใหม่
+        if (isSubmitting) {
+            submitScore();
+        } else {
+            initGame(); // ล้างกระดานให้คนใหม่เล่น
+        }
     }
 
     function submitScore() {
@@ -445,11 +436,9 @@
     }
 
     function closeScoreModal() {
+        // เมื่อกด ปิดและเริ่มใหม่
         document.getElementById('scoreModal').classList.remove('active');
-        if (score === MAX_SCORE) {
-            // ถ้าเต็มแล้วรีเซ็ตกระดานเตรียมให้คนอื่นเล่นต่อได้
-            initGame();
-        }
+        initGame();
     }
 
     function playSoundMiniSuccess() {
