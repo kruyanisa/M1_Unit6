@@ -2,25 +2,39 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>General Vocab Flipcard</title>
+    <!-- นำเข้า Tailwind, SweetAlert และ Config สำหรับ Google Sheets -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Sarabun:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://kruyanisa.github.io/classroom-core/quiz-config.js"></script>
     
     <style>
-        :root { --main: #0ea5e9; --dark: #0284c7; --success: #22c55e; --success-dark: #16a34a; }
+        :root { 
+            --main: #0ea5e9; --dark: #0284c7; 
+            --success: #22c55e; --success-dark: #16a34a; 
+        }
         body { 
             font-family: 'Sarabun', sans-serif; 
             margin: 0; padding: 15px; 
             background: #f0f9ff;
             min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center;
         }
         
-        .container { max-width: 1000px; margin: 0 auto; background: white; border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .profile-bar {
+            font-size: clamp(12px, 3.5vw, 14px); background: #e0f2fe; border: 2px solid var(--main);
+            padding: 8px 15px; border-radius: 20px; color: var(--dark); font-weight: bold;
+            display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 15px; width: 100%; max-width: 1000px; box-sizing: border-box;
+        }
+        .btn-switch { background: #f43f5e; color: white; border: none; padding: 4px 12px; border-radius: 12px; cursor: pointer; font-family: 'Sarabun'; font-weight: bold; }
+
+        .container { width: 100%; max-width: 1000px; margin: 0 auto; background: white; border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); box-sizing: border-box;}
         
-        h1 { font-family: 'Fredoka One', cursive; color: var(--main); text-align: center; font-size: 26px; margin: 5px 0 15px 0; }
-        
-        .progress-indicator { text-align: center; font-size: 16px; font-weight: bold; color: #64748b; margin-bottom: 20px; }
+        h1 { font-family: 'Fredoka One', cursive; color: var(--main); text-align: center; font-size: 26px; margin: 5px 0 10px 0; }
+        .instruction-text { text-align: center; font-size: 15px; font-weight: 800; color: #64748b; margin-bottom: 5px; }
+        .progress-indicator { text-align: center; font-size: 18px; font-weight: bold; color: var(--success-dark); margin-bottom: 20px; }
 
         /* Flipcard Grid */
         .card-grid {
@@ -39,6 +53,7 @@
             aspect-ratio: 1 / 1; 
             perspective: 1000px;
             cursor: pointer;
+            position: relative;
         }
 
         .flip-card-inner {
@@ -46,12 +61,36 @@
             width: 100%;
             height: 100%;
             text-align: center;
-            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1), box-shadow 0.3s;
             transform-style: preserve-3d;
+            border-radius: 15px;
         }
 
         .flip-card.flipped .flip-card-inner {
             transform: rotateY(180deg);
+        }
+
+        /* ไฮไลท์สีเขียวและขอบเมื่อทำสำเร็จ (ฟังเสียง + พลิกดู) */
+        .flip-card.completed-highlight .flip-card-inner {
+            box-shadow: 0 0 0 4px var(--success), 0 8px 16px rgba(34, 197, 94, 0.4);
+        }
+        .flip-card.completed-highlight .flip-card-front {
+            border-color: var(--success); background-color: #f0fdf4;
+        }
+        .flip-card.completed-highlight .flip-card-back {
+            background: linear-gradient(135deg, var(--success-dark), var(--success)); border-color: var(--success-dark);
+        }
+
+        .status-badge {
+            position: absolute; top: -10px; right: -10px; background: white; border-radius: 50%;
+            font-size: 20px; z-index: 10; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: none;
+        }
+        .flip-card.completed-highlight .status-badge { display: block; animation: pop 0.3s ease-out; }
+
+        @keyframes pop {
+            0% { transform: scale(0); }
+            80% { transform: scale(1.2); }
+            100% { transform: scale(1); }
         }
 
         .flip-card-front, .flip-card-back {
@@ -69,179 +108,362 @@
             border: 3px solid #bae6fd;
             padding: 10px;
             transition: all 0.3s ease;
+            box-sizing: border-box;
         }
 
-        /* ด้านหน้าการ์ด */
-        .flip-card-front {
-            background-color: white;
-        }
+        .flip-card-front { background-color: white; }
         
         .speaker-btn {
-            background: #fef08a;
-            border: 2px solid #ca8a04;
-            color: #854d0e;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.2s;
-            position: absolute;
-            top: 8px;
-            right: 8px;
+            background: #fef08a; border: 2px solid #ca8a04; color: #854d0e; border-radius: 50%;
+            width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+            font-size: 16px; cursor: pointer; transition: 0.2s; position: absolute; top: 8px; right: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 5;
         }
         .speaker-btn:active { transform: scale(0.9); background: #fde047; }
+        .speaker-btn.played-glow { background: var(--success); border-color: var(--success-dark); color: white; }
 
         .vocab-eng {
-            font-family: 'Fredoka One', cursive;
-            font-size: 18px;
-            color: #1e293b;
-            line-height: 1.2;
-            word-break: break-word;
+            font-family: 'Fredoka One', cursive; font-size: 18px; color: #1e293b;
+            line-height: 1.2; word-break: break-word; z-index: 1;
         }
 
-        /* ด้านหลังการ์ด */
         .flip-card-back {
-            background: linear-gradient(135deg, #0ea5e9, #38bdf8);
-            color: white;
-            transform: rotateY(180deg);
-            border-color: #0284c7;
+            background: linear-gradient(135deg, #0ea5e9, #38bdf8); color: white;
+            transform: rotateY(180deg); border-color: #0284c7;
         }
 
-        .vocab-thai {
-            font-size: 18px;
-            font-weight: 800;
-            line-height: 1.4;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-        }
+        .vocab-thai { font-size: 18px; font-weight: 800; line-height: 1.4; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
 
-        /* คลาสไฮไลท์สีเขียวเมื่อเปิดแล้ว */
-        .flip-card.completed .flip-card-front {
-            border-color: var(--success);
-            background-color: #f0fdf4;
+        /* Submit Button */
+        .btn-action { 
+            width: 100%; max-width: 400px; margin: 30px auto 10px auto; background: var(--main); color: white; font-weight: 800; font-size: 18px; padding: 15px; border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 0 var(--dark); transition: 0.1s; display: flex; justify-content: center; align-items: center; gap: 8px; 
         }
-        .flip-card.completed .flip-card-back {
-            background: linear-gradient(135deg, var(--success-dark), var(--success));
-            border-color: var(--success-dark);
-        }
+        .btn-action:active { transform: translateY(4px); box-shadow: none; }
+
+        /* Modal UI */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(240,249,255,0.9); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 2000; visibility: hidden; opacity: 0; transition: 0.3s; padding: 15px; box-sizing: border-box; }
+        .modal-overlay.active { visibility: visible; opacity: 1; }
+        .modal-box { background: white; padding: 30px 20px; border-radius: 30px; text-align: center; width: 100%; max-width: 340px; border: 4px solid var(--main); box-shadow: 0 15px 30px rgba(14, 165, 233, 0.2); box-sizing: border-box; }
+        .modal-box input.login-input { width: 100%; padding: 12px; margin-bottom: 12px; border: 2px solid var(--main); border-radius: 15px; text-align: center; font-family: 'Sarabun'; font-size: 16px; font-weight: 600; box-sizing: border-box; outline: none; }
+        .modal-box input.login-input:focus { border-color: var(--dark); }
+        .score-num { font-size: 60px; font-weight: 900; color: var(--dark); margin: 10px 0; display: block; line-height: 1;}
 
     </style>
 </head>
 <body>
-    
+
+    <div id="userProfile" class="profile-bar" style="display:none;">
+        <span>👤 <span id="p_name"></span> | 🏫 <span id="p_room"></span> | 🆔 <span id="p_id"></span></span>
+        <button class="btn-switch" onclick="switchAccount()">🔄 สลับบัญชี</button>
+    </div>
+
     <div class="container" id="gameContainer">
         <h1>📚 General Vocab Flipcard</h1>
         
-        <div class="progress-indicator" id="progressIndicator">เปิดการ์ด: 0 / 31</div>
+        <div class="instruction-text">กดฟังเสียง 🔊 และพลิกดูคำแปล 🔄 ให้ครบทุกใบ เพื่อรับคะแนน</div>
+        <div class="progress-indicator" id="progressIndicator">ทบทวนสำเร็จ: 0 / 31</div>
 
         <div class="card-grid" id="cardGrid"></div>
+
+        <button class="btn-action" onclick="trySubmit()">✅ ส่งคะแนน</button>
     </div>
 
-    <script>
-        // ข้อมูลการ์ดทั้ง 31 ใบ พร้อมคำแปลและไฟล์เสียงอิงตามรูป
-        const vocabList = [
-            { id: "v1", word: "pack (v.)", translation: "จัด (กระเป๋า)", audio: "pack.mp3" },
-            { id: "v2", word: "need (v.)", translation: "จำเป็นต้องใช้", audio: "need.mp3" },
-            { id: "v3", word: "vary (v.)", translation: "แตกต่างกัน,<br>เปลี่ยนแปลง", audio: "vary.mp3" },
-            
-            { id: "adj1", word: "late (adj.)", translation: "ปลาย<br>(เช่น late August)", audio: "late.mp3" },
-            { id: "adj2", word: "long-sleeved (adj.)", translation: "แขนยาว", audio: "long-sleeved.mp3" },
-            { id: "adj3", word: "short-sleeved (adj.)", translation: "แขนสั้น", audio: "short-sleeved.mp3" },
-            { id: "adj4", word: "north-west (adj.)", translation: "ตะวันตก<br>เฉียงเหนือ", audio: "north-west.mp3" },
-            { id: "adj5", word: "south-west (adj.)", translation: "ตะวันตก<br>เฉียงใต้", audio: "south-west.mp3" },
-            { id: "adj6", word: "right (adj.)", translation: "ที่เหมาะสม,<br>ที่ถูกต้อง", audio: "right.mp3" },
-            
-            { id: "n1", word: "Alaska (n.)", translation: "อะแลสกา", audio: "Alaska2.mp3" },
-            { id: "n2", word: "Spain (n.)", translation: "ประเทศสเปน", audio: "Spain2.mp3" },
-            { id: "n3", word: "Turkey (n.)", translation: "ประเทศตุรกี", audio: "Turkey.mp3" },
-            { id: "n4", word: "Bering Sea (n.)", translation: "ทะเลเบริง", audio: "Bering_Sea.mp3" },
-            { id: "n5", word: "Pacific Ocean (n.)", translation: "มหาสมุทร<br>แปซิฟิก", audio: "Pacific_Ocean.mp3" },
-            { id: "n6", word: "region (n.)", translation: "ภูมิภาค", audio: "region.mp3" },
-            { id: "n7", word: "corner (n.)", translation: "มุม, พื้นที่", audio: "corner.mp3" },
-            { id: "n8", word: "climate (n.)", translation: "ภูมิอากาศ", audio: "climate.mp3" },
-            { id: "n9", word: "weather (n.)", translation: "สภาพอากาศ", audio: "weather.mp3" },
-            { id: "n10", word: "season (n.)", translation: "ฤดูกาล", audio: "season.mp3" },
-            { id: "n11", word: "summer (n.)", translation: "ฤดูร้อน", audio: "summer2.mp3" },
-            { id: "n12", word: "winter (n.)", translation: "ฤดูหนาว", audio: "winter2.mp3" },
-            { id: "n13", word: "spring (n.)", translation: "ฤดูใบไม้ผลิ", audio: "spring2.mp3" },
-            { id: "n14", word: "autumn (n.)", translation: "ฤดูใบไม้ร่วง", audio: "autumn2.mp3" },
-            { id: "n15", word: "temperature (n.)", translation: "อุณหภูมิ", audio: "temperature.mp3" },
-            { id: "n16", word: "early morning (n.)", translation: "ตอนเช้าตรู่", audio: "early_morning.mp3" },
-            { id: "n17", word: "night time (n.)", translation: "เวลากลางคืน", audio: "night_time.mp3" },
-            
-            { id: "c1", word: "sandals (n.)", translation: "รองเท้าแตะ<br>รัดส้น", audio: "sandals.mp3" },
-            { id: "c2", word: "flip-flops (n.)", translation: "รองเท้าแตะ<br>หูคีบ", audio: "flip-flops.mp3" },
-            { id: "c3", word: "sunglasses (n.)", translation: "แว่นตากันแดด", audio: "sunglasses.mp3" },
-            { id: "c4", word: "swimsuit (n.)", translation: "ชุดว่ายน้ำ", audio: "swimsuit.mp3" },
-            { id: "c5", word: "umbrella (n.)", translation: "ร่ม", audio: "umbrella.mp3" }
-        ];
+    <!-- Modal Login -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal-box">
+            <h2 id="modalTitle" style="color:var(--dark); margin-top:0; font-size: 24px;">📝 ลงชื่อใช้งาน</h2>
+            <p id="modalSub" style="color: #64748b; font-weight: 600; margin-top: 0; font-size: 14px;"></p>
+            <input type="text" id="in_name" class="login-input" placeholder="ชื่อ - นามสกุล">
+            <input type="text" id="in_room" class="login-input" placeholder="ชั้น/ห้อง (เช่น 1/1)">
+            <input type="text" id="in_id" class="login-input" placeholder="รหัสนักเรียน (5 หลัก)" maxlength="5">
+            <button class="btn-action" id="btnSubmitLogin" onclick="confirmUser()" style="margin-top:5px; margin-bottom: 0;">🚀 ยืนยัน</button>
+        </div>
+    </div>
 
-        let flippedCards = new Set();
-        let currentAudio = null;
+    <!-- Modal Score/Success -->
+    <div class="modal-overlay" id="scoreModal">
+        <div class="modal-box">
+            <h2 style="color:var(--dark); margin-top:0; font-size: 26px;">🎉 ส่งสำเร็จ!</h2>
+            <p style="color: #64748b; font-weight: 600; margin-bottom: 0;">คะแนนทบทวนคำศัพท์ของคุณ</p>
+            <span class="score-num"><span id="finalScoreText">0</span><span style="font-size:30px; color:#bae6fd;">/31</span></span>
+            <div id="saveStatus" style="font-weight:bold; font-size:15px; margin-bottom:15px; color:#15803d; min-height:22px;"></div>
+            <button class="btn-action" onclick="closeScoreModal()" style="margin-top:5px; margin-bottom: 0;">✅ ปิดและเริ่มใหม่</button>
+        </div>
+    </div>
 
-        window.onload = () => { 
-            startGame(); 
+<script>
+    const TOPIC_NAME = 'ม.1 Unit 6 Culture corner Vocab flipcard words';
+    const vocabList = [
+        { id: "v1", word: "pack (v.)", translation: "จัด (กระเป๋า)", audio: "pack.mp3" },
+        { id: "v2", word: "need (v.)", translation: "จำเป็นต้องใช้", audio: "need.mp3" },
+        { id: "v3", word: "vary (v.)", translation: "แตกต่างกัน,<br>เปลี่ยนแปลง", audio: "vary.mp3" },
+        { id: "adj1", word: "late (adj.)", translation: "ปลาย<br>(เช่น late August)", audio: "late.mp3" },
+        { id: "adj2", word: "long-sleeved (adj.)", translation: "แขนยาว", audio: "long-sleeved.mp3" },
+        { id: "adj3", word: "short-sleeved (adj.)", translation: "แขนสั้น", audio: "short-sleeved.mp3" },
+        { id: "adj4", word: "north-west (adj.)", translation: "ตะวันตก<br>เฉียงเหนือ", audio: "north-west.mp3" },
+        { id: "adj5", word: "south-west (adj.)", translation: "ตะวันตก<br>เฉียงใต้", audio: "south-west.mp3" },
+        { id: "adj6", word: "right (adj.)", translation: "ที่เหมาะสม,<br>ที่ถูกต้อง", audio: "right.mp3" },
+        { id: "n1", word: "Alaska (n.)", translation: "อะแลสกา", audio: "Alaska2.mp3" },
+        { id: "n2", word: "Spain (n.)", translation: "ประเทศสเปน", audio: "Spain2.mp3" },
+        { id: "n3", word: "Turkey (n.)", translation: "ประเทศตุรกี", audio: "Turkey.mp3" },
+        { id: "n4", word: "Bering Sea (n.)", translation: "ทะเลเบริง", audio: "Bering_Sea.mp3" },
+        { id: "n5", word: "Pacific Ocean (n.)", translation: "มหาสมุทร<br>แปซิฟิก", audio: "Pacific_Ocean.mp3" },
+        { id: "n6", word: "region (n.)", translation: "ภูมิภาค", audio: "region.mp3" },
+        { id: "n7", word: "corner (n.)", translation: "มุม, พื้นที่", audio: "corner.mp3" },
+        { id: "n8", word: "climate (n.)", translation: "ภูมิอากาศ", audio: "climate.mp3" },
+        { id: "n9", word: "weather (n.)", translation: "สภาพอากาศ", audio: "weather.mp3" },
+        { id: "n10", word: "season (n.)", translation: "ฤดูกาล", audio: "season.mp3" },
+        { id: "n11", word: "summer (n.)", translation: "ฤดูร้อน", audio: "summer2.mp3" },
+        { id: "n12", word: "winter (n.)", translation: "ฤดูหนาว", audio: "winter2.mp3" },
+        { id: "n13", word: "spring (n.)", translation: "ฤดูใบไม้ผลิ", audio: "spring2.mp3" },
+        { id: "n14", word: "autumn (n.)", translation: "ฤดูใบไม้ร่วง", audio: "autumn2.mp3" },
+        { id: "n15", word: "temperature (n.)", translation: "อุณหภูมิ", audio: "temperature.mp3" },
+        { id: "n16", word: "early morning (n.)", translation: "ตอนเช้าตรู่", audio: "early_morning.mp3" },
+        { id: "n17", word: "night time (n.)", translation: "เวลากลางคืน", audio: "night_time.mp3" },
+        { id: "c1", word: "sandals (n.)", translation: "รองเท้าแตะ<br>รัดส้น", audio: "sandals.mp3" },
+        { id: "c2", word: "flip-flops (n.)", translation: "รองเท้าแตะ<br>หูคีบ", audio: "flip-flops.mp3" },
+        { id: "c3", word: "sunglasses (n.)", translation: "แว่นตากันแดด", audio: "sunglasses.mp3" },
+        { id: "c4", word: "swimsuit (n.)", translation: "ชุดว่ายน้ำ", audio: "swimsuit.mp3" },
+        { id: "c5", word: "umbrella (n.)", translation: "ร่ม", audio: "umbrella.mp3" }
+    ];
+    
+    const MAX_SCORE = vocabList.length;
+    let score = 0;
+    let isSubmitting = false; 
+    let currentAudio = null;
+    let cardStates = {};
+
+    document.addEventListener("DOMContentLoaded", () => {
+        initGame();
+        if(localStorage.getItem('studentId')) {
+            document.getElementById('userProfile').style.display = 'flex';
+            document.getElementById('p_name').innerText = localStorage.getItem('studentName');
+            document.getElementById('p_room').innerText = localStorage.getItem('studentRoom');
+            document.getElementById('p_id').innerText = localStorage.getItem('studentId'); 
+        }
+    });
+
+    function initGame() {
+        const grid = document.getElementById('cardGrid');
+        grid.innerHTML = '';
+        cardStates = {};
+        score = 0;
+        if(currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; }
+        
+        document.getElementById('progressIndicator').innerText = `ทบทวนสำเร็จ: 0 / ${MAX_SCORE}`;
+
+        // สุ่มเรียงคำศัพท์
+        vocabList.sort(() => Math.random() - 0.5);
+
+        vocabList.forEach(item => {
+            cardStates[item.id] = { flipped: false, played: false, completed: false };
+            
+            let card = document.createElement('div');
+            card.className = "flip-card";
+            card.id = `card-${item.id}`;
+            card.innerHTML = `
+                <div class="status-badge" id="badge-${item.id}">✅</div>
+                <div class="flip-card-inner" id="inner-${item.id}" onclick="handleFlip('${item.id}')">
+                    <div class="flip-card-front">
+                        <div class="speaker-btn" id="audio-btn-${item.id}" onclick="playAudio(event, '${item.id}', '${item.audio}')">🔊</div>
+                        <div class="vocab-eng">${item.word}</div>
+                    </div>
+                    <div class="flip-card-back">
+                        <div class="vocab-thai">${item.translation}</div>
+                    </div>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function handleFlip(id) {
+        const cardInner = document.getElementById(`inner-${id}`);
+        cardInner.parentElement.classList.toggle('flipped');
+
+        if (!cardStates[id].flipped) {
+            cardStates[id].flipped = true;
+            checkCardComplete(id);
+        }
+    }
+
+    function playAudio(event, id, audioSrc) {
+        event.stopPropagation(); // ไม่ให้การกดปุ่มไปสั่งเปิดการ์ด
+        if(currentAudio) {
+            currentAudio.pause();
+            currentAudio.currentTime = 0;
+        }
+        currentAudio = new Audio(audioSrc);
+        currentAudio.play().catch(e => console.log("รอไฟล์เสียงอัปโหลด..."));
+
+        if (!cardStates[id].played) {
+            cardStates[id].played = true;
+            document.getElementById(`audio-btn-${id}`).classList.add('played-glow');
+            checkCardComplete(id);
+        }
+    }
+
+    function checkCardComplete(id) {
+        if (cardStates[id].flipped && cardStates[id].played && !cardStates[id].completed) {
+            cardStates[id].completed = true;
+            document.getElementById(`card-${id}`).classList.add('completed-highlight');
+            playSoundMiniSuccess();
+            
+            // อัปเดต Progress
+            const currentCount = calculateScore();
+            document.getElementById('progressIndicator').innerText = `ทบทวนสำเร็จ: ${currentCount} / ${MAX_SCORE}`;
+        }
+    }
+
+    function calculateScore() {
+        return Object.values(cardStates).filter(state => state.completed).length;
+    }
+
+    function trySubmit() {
+        score = calculateScore();
+        if (score < MAX_SCORE) {
+            Swal.fire({
+                title: 'ยังฝึกไม่ครบ!',
+                html: `หนูทบทวนสำเร็จไป <b>${score}</b> คำ จากทั้งหมด <b>${MAX_SCORE}</b> คำ<br>(ต้องกดฟังเสียง 🔊 และพลิกดูคำแปล 🔄 ให้ครบ)<br><br><i>ต้องการส่งคะแนนเท่านี้ หรือกลับไปฝึกต่อ?</i>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#f43f5e',
+                cancelButtonColor: '#0ea5e9',
+                confirmButtonText: 'ยืนยันส่งคะแนน',
+                cancelButtonText: 'กลับไปฝึกให้ครบ'
+            }).then((result) => {
+                if (result.isConfirmed) proceedToLogin();
+            });
+        } else {
+            proceedToLogin();
+        }
+    }
+
+    function proceedToLogin() {
+        if(!localStorage.getItem('studentId')) {
+            isSubmitting = true; 
+            document.getElementById('modalSub').innerText = `คะแนนที่ทำได้คือ ${score}/${MAX_SCORE}\nลงชื่อเพื่อบันทึกคะแนน`;
+            document.getElementById('btnSubmitLogin').innerText = "🚀 บันทึกคะแนน";
+            document.getElementById('loginModal').classList.add('active');
+        } else {
+            submitScore();
+        }
+    }
+
+    function switchAccount() {
+        Swal.fire({
+            title: '⚠️ สลับบัญชี?', text: "เปลี่ยนคนเล่น สถานะการฝึกจะถูกล้างใหม่", icon: 'warning',
+            showCancelButton: true, confirmButtonColor: '#0ea5e9', cancelButtonColor: '#94a3b8',
+            confirmButtonText: 'ตกลง', cancelButtonText: 'ยกเลิก'
+        }).then((res) => {
+            if(res.isConfirmed) {
+                localStorage.clear(); 
+                document.getElementById('userProfile').style.display = 'none';
+                
+                isSubmitting = false; 
+                
+                document.getElementById('in_name').value = '';
+                document.getElementById('in_room').value = '';
+                document.getElementById('in_id').value = '';
+                
+                document.getElementById('modalSub').innerText = "ลงชื่อเข้าใช้งานสำหรับนักเรียนคนใหม่ (กดตกลงเพื่อเริ่มฝึก)";
+                document.getElementById('btnSubmitLogin').innerText = "🚀 เริ่มฝึกทบทวน";
+                document.getElementById('loginModal').classList.add('active');
+            }
+        });
+    }
+
+    document.getElementById('in_room').addEventListener('blur', function() {
+        let nums = this.value.match(/\d+/g);
+        if (nums && nums.length >= 2) this.value = `ม.${nums[0]}/${nums[1]}`;
+        else if (nums && nums.length === 1) this.value = `ม.1/${nums[0]}`;
+    });
+
+    function confirmUser() {
+        let n = document.getElementById('in_name').value.trim();
+        let r = document.getElementById('in_room').value.trim();
+        let id = document.getElementById('in_id').value.trim();
+        if(!n || !r || id.length !== 5) { Swal.fire('ข้อมูลไม่ครบ!', 'กรุณากรอกชื่อ ห้อง และรหัส 5 หลัก', 'warning'); return; }
+        
+        localStorage.setItem('studentName', n); 
+        localStorage.setItem('studentRoom', r); 
+        localStorage.setItem('studentId', id);
+        
+        document.getElementById('loginModal').classList.remove('active');
+        document.getElementById('userProfile').style.display = 'flex';
+        document.getElementById('p_name').innerText = n;
+        document.getElementById('p_room').innerText = r;
+        document.getElementById('p_id').innerText = id; 
+        
+        if (isSubmitting) {
+            submitScore();
+        } else {
+            initGame(); 
+        }
+    }
+
+    function submitScore() {
+        document.getElementById('scoreModal').classList.add('active');
+        document.getElementById('finalScoreText').innerText = score;
+        const stat = document.getElementById('saveStatus');
+        
+        if(typeof QUIZ_CONFIG === 'undefined' || !QUIZ_CONFIG.SCRIPT_URL) {
+            stat.innerText = "❌ ไม่พบไฟล์ตั้งค่า (quiz-config.js)"; 
+            return;
+        }
+
+        stat.innerText = "⏳ กำลังบันทึกคะแนน...";
+
+        const payload = {
+            name: localStorage.getItem('studentName'), 
+            room: localStorage.getItem('studentRoom'),
+            studentId: "'" + localStorage.getItem('studentId'), 
+            lesson: TOPIC_NAME, score: score, maxScore: MAX_SCORE
         };
 
-        function startGame() {
-            vocabList.sort(() => Math.random() - 0.5); 
-            renderCards();
-        }
+        fetch(QUIZ_CONFIG.SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) })
+            .catch(e => console.error(e));
 
-        function renderCards() {
-            const grid = document.getElementById('cardGrid');
-            grid.innerHTML = '';
+        setTimeout(() => {
+            stat.innerText = "✅ บันทึกคะแนนลงระบบเรียบร้อย!"; 
+            playSoundSuccess();
+        }, 1500);
+    }
 
-            vocabList.forEach(item => {
-                let card = document.createElement('div');
-                card.className = "flip-card";
-                card.id = `card-${item.id}`;
-                card.innerHTML = `
-                    <div class="flip-card-inner" id="inner-${item.id}">
-                        <div class="flip-card-front" onclick="handleFlip('${item.id}')">
-                            <div class="speaker-btn" onclick="playAudio(event, '${item.audio}')">🔊</div>
-                            <div class="vocab-eng">${item.word}</div>
-                        </div>
-                        <div class="flip-card-back" onclick="handleFlip('${item.id}')">
-                            <div class="vocab-thai">${item.translation}</div>
-                        </div>
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
-        }
+    function closeScoreModal() {
+        document.getElementById('scoreModal').classList.remove('active');
+        initGame();
+    }
 
-        function handleFlip(id) {
-            const cardElement = document.getElementById(`card-${id}`);
-            const cardInner = document.getElementById(`inner-${id}`);
-            
-            cardInner.parentElement.classList.toggle('flipped');
+    function playSoundMiniSuccess() {
+        try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+        } catch(e) {}
+    }
 
-            // เพิ่มคลาส completed (ไฮไลท์สีเขียว) เมื่อเปิด
-            if (!cardElement.classList.contains('completed')) {
-                cardElement.classList.add('completed');
-                flippedCards.add(id);
-                updateProgress();
-            }
-        }
+    function playSoundSuccess() {
+        try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(500, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.5);
+        } catch(e) {}
+    }
+</script>
 
-        function playAudio(event, audioSrc) {
-            event.stopPropagation();
-            
-            if(currentAudio) {
-                currentAudio.pause();
-                currentAudio.currentTime = 0;
-            }
-            currentAudio = new Audio(audioSrc);
-            currentAudio.play().catch(e => console.log("รอไฟล์เสียงอัปโหลด..."));
-        }
-
-        function updateProgress() {
-            document.getElementById('progressIndicator').innerText = `เปิดการ์ด: ${flippedCards.size} / ${vocabList.length}`;
-        }
-    </script>
 </body>
 </html>
